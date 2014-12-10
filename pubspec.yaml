@@ -1,0 +1,10 @@
+name: reflective
+author: Stijn Van Bael
+version: 0.0.1
+description: Box Data Store
+dependencies:
+  io: any
+  exportable: any
+  collection: any
+dev_dependencies:
+  unittest: any
