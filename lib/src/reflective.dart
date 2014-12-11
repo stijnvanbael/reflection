@@ -38,6 +38,8 @@ class FieldReflection {
 
   value(Object entity) => reflect(entity).getField(symbol).reflectee;
 
+  get name => symbol.toString();
+
   String toString() {
     return symbol.toString();
   }
