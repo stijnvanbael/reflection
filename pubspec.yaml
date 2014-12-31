@@ -1,8 +1,9 @@
 name: reflective
 author: Stijn Van Bael <stijn.van.bael@appify.be>
 homepage: https://github.com/stijnvanbael/reflection
-version: 0.0.1
-description: Box Data Store
+version: 0.0.4
+description: A fluent reflection API
 dependencies:
 dev_dependencies:
   unittest: any
+  collection: any
