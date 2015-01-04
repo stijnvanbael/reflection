@@ -33,7 +33,7 @@ class Converter {
   static Converter find(TypeReflection source, TypeReflection target) {
     return converters.firstWhere(
             (c) => c.source.sameOrSuper(source) && c.target.sameOrSuper(target),
-        orElse: () => throw new ConverterException("No converter found from " + source.toString() + " to " + target.toString() + "."));
+        orElse: () => throw new ConverterException('No converter found from ' + source.toString() + ' to ' + target.toString() + '.'));
   }
 
   TypeReflection source;
@@ -61,29 +61,31 @@ installJsonConverters() {
 }
 
 class ObjectToJson extends Converter {
-  // TODO: convert Map to JSON
   ObjectToJson() : super(new TypeReflection(Object), new TypeReflection(Json));
 
   convert(object, TypeReflection targetReflection) {
-    var simplified = simplify(object);
+    var simplified = _convert(object);
     return new Json(JSON.encode(simplified));
   }
 
-  static simplify(object) {
+  _convert(object) {
     if (object is DateTime) {
       return object.toString();
-    } else if (object is String || object is int || object is double || object is bool) {
+    } else if (object == null || object is String || object is int || object is double || object is bool) {
       return object;
     } else if (object is Iterable) {
-      return new List.from(object.map((item) => simplify(item)));
+      return new List.from(object.map((item) => _convert(item)));
     } else if (object is Map) {
-      // TODO
+      Map map = {
+      };
+      object.keys.forEach((k) => map[k.toString()] = _convert(object[k]));
+      return map;
     } else {
       TypeReflection type = new TypeReflection.fromInstance(object);
-      return type.fields
-      .where((field) => !field.has(Ignore))
+      return type.fields.values
+      .where((field) => !field.has(Transient))
       .map((field) => {
-          field.name: simplify(field.value(object))
+          field.name: _convert(field.value(object))
       })
       .reduce((Map m1, Map m2) {
         m2.addAll(m1);
@@ -104,22 +106,38 @@ class JsonToObject extends Converter {
   _convert(object, TypeReflection targetReflection) {
     if (object is Map) {
       if (targetReflection.sameOrSuper(Map)) {
-        // TODO
+        TypeReflection keyType = targetReflection.arguments[0];
+        TypeReflection valueType = targetReflection.arguments[1];
+        Map map = {
+        };
+        object.keys.forEach((k) {
+          var newKey = keyType.sameOrSuper(k) ? k : keyType.construct(args: [k]);
+          map[newKey] = _convert(object[k], valueType);
+        });
+        return map;
       } else {
         var instance = targetReflection.construct();
-        targetReflection.fields.forEach(
-                (f) => f.set(instance, _convert(object[f.name], f.type)));
+        object.keys.forEach((k) {
+          if (targetReflection.fields[k] == null)
+            throw new JsonException('Unknown property: ' + targetReflection.name + '.' + k);
+        });
+        Maps.forEach(targetReflection.fields,
+            (name, field) => field.set(instance, _convert(object[name], field.type)));
         return instance;
       }
     } else if (object is Iterable) {
-      var itemType = targetReflection.arguments[0];
+      TypeReflection itemType = targetReflection.arguments[0];
       return new List.from(object.map((i) => _convert(i, itemType)));
-    } else if (targetReflection.sameOrSuper(DateTime)){
+    } else if (targetReflection.sameOrSuper(DateTime)) {
       return DateTime.parse(object);
     } else {
       return object;
     }
   }
+}
+
+class JsonException extends ConverterException {
+  JsonException(String message) : super(message);
 }
 
 class Json {
@@ -134,8 +152,8 @@ class Json {
   int get hashCode => value.hashCode;
 }
 
-class Ignore {
-  const Ignore();
+class Transient {
+  const Transient();
 }
 
-const Ignore ignore = const Ignore();
+const Transient transient = const Transient();
