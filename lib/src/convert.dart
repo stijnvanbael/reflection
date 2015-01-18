@@ -15,7 +15,10 @@ class Conversion {
   }
 
   to(Type target) {
-    TypeReflection targetReflection = new TypeReflection(target);
+    return toReflection(new TypeReflection(target));
+  }
+
+  toReflection(TypeReflection targetReflection) {
     Converter converter = Converter.find(source, targetReflection);
     return converter.convert(object, targetReflection);
   }

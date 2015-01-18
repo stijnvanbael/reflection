@@ -6,6 +6,19 @@ import 'package:collection/equality.dart';
 
 
 main() {
+  group('Reflection', () {
+    test('Variable generic arguments', () {
+      TypeReflection<Map<String, Project>> reflection = new TypeReflection(Map, [String, Project]);
+      expect(reflection.arguments.length, 2);
+      expect(reflection.arguments[0], new TypeReflection(String));
+      expect(reflection.arguments[1], new TypeReflection(Project));
+    });
+
+    test('Reuse of reflections', () {
+      // TODO
+    });
+  });
+
   group('Conversion', () {
     setUp(() {
       installJsonConverters();

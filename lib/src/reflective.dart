@@ -1,17 +1,30 @@
 part of reflective;
 
-class TypeReflection {
+class TypeReflection<T> {
   ClassMirror mirror;
+  List<TypeReflection> _arguments;
 
-  TypeReflection(Type type) {
+  TypeReflection(Type type, [List<Type> arguments]) {
     mirror = reflectClass(type);
+    if(arguments != null) {
+      _arguments = new List.from(arguments.map((arg) => new TypeReflection(arg)));
+    } else {
+      _getArgumentsFromMirror();
+    }
   }
 
   TypeReflection.fromInstance(instance) {
     mirror = reflect(instance).type;
+    _getArgumentsFromMirror();
   }
 
-  TypeReflection.fromMirror(this.mirror);
+  TypeReflection.fromMirror(this.mirror) {
+    _getArgumentsFromMirror();
+  }
+
+  _getArgumentsFromMirror() {
+    _arguments = new List.from(mirror.typeArguments.map((m) => new TypeReflection.fromMirror(m)));
+  }
 
   get type => mirror.reflectedType;
 
@@ -48,9 +61,9 @@ class TypeReflection {
     }
   }
 
-  List<TypeReflection> get arguments => new List.from(mirror.typeArguments.map((m) => new TypeReflection.fromMirror(m)));
+  List<TypeReflection> get arguments => _arguments;
 
-  construct({Map namedArgs: const {
+  T construct({Map namedArgs: const {
   }, List args: const [], String constructor: ''}) {
     return mirror.newInstance(MirrorSystem.getSymbol(constructor), args, namedArgs).reflectee;
   }
@@ -86,13 +99,15 @@ class FieldReflection {
 
 class Maps {
   static Map index(Iterable iterable, indexer(key)) {
-    Map result = {};
+    Map result = {
+    };
     iterable.forEach((i) => result[indexer(i)] = i);
     return result;
   }
 
   static Map where(Map map, predicate(key, value)) {
-    Map result = {};
+    Map result = {
+    };
     forEach(map, (k, v) {
       if (predicate(k, v)) result[k] = v;
     });
