@@ -134,3 +134,7 @@ class Maps {
     map.keys.forEach((k) => function(k, map[k]));
   }
 }
+
+class Objects {
+  static int hash(List toHash) =>  toHash.fold(17, (e1, e2) => (e1 != null ? e1.hashCode : 1) * 37 + (e2 != null ? e2.hashCode : 1));
+}
