@@ -14,6 +14,13 @@ main() {
       expect(reflection.arguments[1], new TypeReflection(Project));
     });
 
+    test('Dynamic generic arguments', () {
+      TypeReflection<Map> reflection = new TypeReflection.fromInstance({});
+      expect(reflection.arguments.length, 2);
+      expect(reflection.arguments[0], dynamicReflection);
+      expect(reflection.arguments[1], dynamicReflection);
+    });
+
     test('Reuse of reflections', () {
       // TODO
     });

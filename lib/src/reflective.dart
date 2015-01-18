@@ -1,12 +1,12 @@
 part of reflective;
 
 class TypeReflection<T> {
-  ClassMirror _mirror;
+  TypeMirror _mirror;
   List<TypeReflection> _arguments;
 
   TypeReflection(Type type, [List<Type> arguments]) {
-    _mirror = reflectClass(type);
-    if(arguments != null) {
+    _mirror = reflectType(type);
+    if (arguments != null) {
       _arguments = new List.from(arguments.map((arg) => new TypeReflection(arg)));
     } else {
       _getArgumentsFromMirror();
@@ -23,7 +23,12 @@ class TypeReflection<T> {
   }
 
   _getArgumentsFromMirror() {
-    _arguments = new List.from(_mirror.typeArguments.map((m) => new TypeReflection.fromMirror(m)));
+    _arguments = new List.from(_mirror.typeArguments.map((m) {
+      if (m.reflectedType == dynamic) {
+        return dynamicReflection;
+      }
+      return new TypeReflection.fromMirror(m);
+    }));
   }
 
   Type get type => _mirror.reflectedType;
@@ -31,9 +36,14 @@ class TypeReflection<T> {
   String get name => MirrorSystem.getName(_mirror.qualifiedName);
 
   Map<String, FieldReflection> get fields {
-    return Maps.index(_mirror.declarations.keys
-    .where((key) => _mirror.declarations[key] is VariableMirror)
-    .map((key) => new FieldReflection(key, _mirror.declarations[key], _mirror.instanceMembers[key])),
+    if (!(_mirror is ClassMirror)) {
+      return {
+      };
+    }
+    ClassMirror classMirror = _mirror;
+    return Maps.index(classMirror.declarations.keys
+    .where((key) => classMirror.declarations[key] is VariableMirror)
+    .map((key) => new FieldReflection(key, classMirror.declarations[key], classMirror.instanceMembers[key])),
         (field) => field.name);
   }
 
@@ -65,13 +75,19 @@ class TypeReflection<T> {
 
   T construct({Map namedArgs: const {
   }, List args: const [], String constructor: ''}) {
-    return _mirror.newInstance(MirrorSystem.getSymbol(constructor), args, namedArgs).reflectee;
+    if (!(_mirror is ClassMirror)) {
+      throw 'Cannot construct ' + name;
+    }
+    ClassMirror classMirror = _mirror;
+    return classMirror.newInstance(MirrorSystem.getSymbol(constructor), args, namedArgs).reflectee;
   }
 
   String toString() => name;
 
   bool operator ==(o) => o is TypeReflection && _mirror.qualifiedName == o._mirror.qualifiedName;
 }
+
+TypeReflection<dynamic> dynamicReflection = new TypeReflection(dynamic);
 
 class FieldReflection {
   Symbol _symbol;
