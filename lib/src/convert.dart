@@ -14,8 +14,8 @@ class Conversion {
     return new Conversion(object);
   }
 
-  to(Type target) {
-    return toReflection(new TypeReflection(target));
+  to(Type target, [List<Type> arguments]) {
+    return toReflection(new TypeReflection(target, arguments));
   }
 
   toReflection(TypeReflection targetReflection) {
