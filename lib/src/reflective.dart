@@ -1,11 +1,11 @@
 part of reflective;
 
 class TypeReflection<T> {
-  ClassMirror mirror;
+  ClassMirror _mirror;
   List<TypeReflection> _arguments;
 
   TypeReflection(Type type, [List<Type> arguments]) {
-    mirror = reflectClass(type);
+    _mirror = reflectClass(type);
     if(arguments != null) {
       _arguments = new List.from(arguments.map((arg) => new TypeReflection(arg)));
     } else {
@@ -14,26 +14,26 @@ class TypeReflection<T> {
   }
 
   TypeReflection.fromInstance(instance) {
-    mirror = reflect(instance).type;
+    _mirror = reflect(instance).type;
     _getArgumentsFromMirror();
   }
 
-  TypeReflection.fromMirror(this.mirror) {
+  TypeReflection.fromMirror(this._mirror) {
     _getArgumentsFromMirror();
   }
 
   _getArgumentsFromMirror() {
-    _arguments = new List.from(mirror.typeArguments.map((m) => new TypeReflection.fromMirror(m)));
+    _arguments = new List.from(_mirror.typeArguments.map((m) => new TypeReflection.fromMirror(m)));
   }
 
-  get type => mirror.reflectedType;
+  Type get type => _mirror.reflectedType;
 
-  get name => MirrorSystem.getName(mirror.qualifiedName);
+  String get name => MirrorSystem.getName(_mirror.qualifiedName);
 
   Map<String, FieldReflection> get fields {
-    return Maps.index(mirror.declarations.keys
-    .where((key) => mirror.declarations[key] is VariableMirror)
-    .map((key) => new FieldReflection(key, mirror.declarations[key], mirror.instanceMembers[key])),
+    return Maps.index(_mirror.declarations.keys
+    .where((key) => _mirror.declarations[key] is VariableMirror)
+    .map((key) => new FieldReflection(key, _mirror.declarations[key], _mirror.instanceMembers[key])),
         (field) => field.name);
   }
 
@@ -45,7 +45,7 @@ class TypeReflection<T> {
     if (other is Type) {
       return sameOrSuper(new TypeReflection(other));
     } else if (other is TypeReflection) {
-      return this == other || other.mirror.isSubtypeOf(mirror);
+      return this == other || other._mirror.isSubtypeOf(_mirror);
     } else {
       return sameOrSuper(new TypeReflection.fromInstance(other));
     }
@@ -55,7 +55,7 @@ class TypeReflection<T> {
     if (other is Type) {
       return sameOrSub(new TypeReflection(other));
     } else if (other is TypeReflection) {
-      return this == other || mirror.isSubtypeOf(other.mirror);
+      return this == other || _mirror.isSubtypeOf(other._mirror);
     } else {
       return sameOrSub(new TypeReflection.fromInstance(other));
     }
@@ -65,36 +65,36 @@ class TypeReflection<T> {
 
   T construct({Map namedArgs: const {
   }, List args: const [], String constructor: ''}) {
-    return mirror.newInstance(MirrorSystem.getSymbol(constructor), args, namedArgs).reflectee;
+    return _mirror.newInstance(MirrorSystem.getSymbol(constructor), args, namedArgs).reflectee;
   }
 
   String toString() => name;
 
-  bool operator ==(o) => o is TypeReflection && mirror.qualifiedName == o.mirror.qualifiedName;
+  bool operator ==(o) => o is TypeReflection && _mirror.qualifiedName == o._mirror.qualifiedName;
 }
 
 class FieldReflection {
-  Symbol symbol;
-  VariableMirror variable;
-  MethodMirror accessor;
+  Symbol _symbol;
+  VariableMirror _variable;
+  MethodMirror _accessor;
 
-  FieldReflection(this.symbol, this.variable, this.accessor);
+  FieldReflection(this._symbol, this._variable, this._accessor);
 
-  bool has(Type metadata) => variable.metadata
+  bool has(Type metadata) => _variable.metadata
   .firstWhere((instance) => instance.type.reflectedType == metadata,
   orElse: () => null) != null;
 
-  value(Object entity) => reflect(entity).getField(symbol).reflectee;
+  value(Object entity) => reflect(entity).getField(_symbol).reflectee;
 
-  set(Object entity, value) => reflect(entity).setField(symbol, value);
+  set(Object entity, value) => reflect(entity).setField(_symbol, value);
 
-  TypeReflection get type => new TypeReflection.fromMirror(accessor.returnType);
+  TypeReflection get type => new TypeReflection.fromMirror(_accessor.returnType);
 
-  get name => MirrorSystem.getName(symbol);
+  String get name => MirrorSystem.getName(_symbol);
 
   String toString() => name;
 
-  bool operator ==(o) => o is FieldReflection && variable.qualifiedName == o.variable.qualifiedName && symbol == o.symbol;
+  bool operator ==(o) => o is FieldReflection && _variable.qualifiedName == o._variable.qualifiedName && _symbol == o._symbol;
 }
 
 class Maps {
