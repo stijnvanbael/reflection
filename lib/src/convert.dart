@@ -19,16 +19,24 @@ class Conversion {
   }
 
   toReflection(TypeReflection targetReflection) {
-    Converter converter = Converter.find(source, targetReflection);
-    return converter.convert(object, targetReflection);
+    Converter converter = Converters.find(source, targetReflection);
+    if(converter is ConverterBase) {
+      return converter.convertTo(object, targetReflection);
+    }
+    return converter.convert(object);
   }
 }
 
-class Converter {
+class Converters {
   static List<Converter> converters = [];
 
   static Converter register(Type source, Type target, Transformation conversion) {
-    Converter converter = new Converter(new TypeReflection(source), new TypeReflection(target), conversion);
+    Converter converter = new ConverterBase(new TypeReflection(source), new TypeReflection(target), conversion);
+    converters.add(converter);
+    return converter;
+  }
+
+  static Converter add(Converter converter) {
     converters.add(converter);
     return converter;
   }
@@ -38,14 +46,20 @@ class Converter {
             (c) => c.source.sameOrSuper(source) && c.target.sameOrSuper(target),
         orElse: () => throw new ConverterException('No converter found from ' + source.toString() + ' to ' + target.toString() + '.'));
   }
+}
 
+class ConverterBase<S, T> extends Converter<S, T> {
   TypeReflection source;
   TypeReflection target;
   Transformation conversion;
 
-  Converter(this.source, this.target, [this.conversion]);
+  ConverterBase(this.source, this.target, [this.conversion]);
 
-  convert(object, TypeReflection targetReflection) {
+  T convert(S object) {
+    return convertTo(object, target);
+  }
+
+  T convertTo(S object, TypeReflection targetReflection) {
     return conversion(object);
   }
 }
@@ -59,14 +73,14 @@ class ConverterException implements Exception {
 }
 
 installJsonConverters() {
-  Converter.converters.add(new ObjectToJson());
-  Converter.converters.add(new JsonToObject());
+  Converters.add(new ObjectToJson());
+  Converters.add(new JsonToObject());
 }
 
-class ObjectToJson extends Converter {
+class ObjectToJson extends ConverterBase<Object, Json> {
   ObjectToJson() : super(new TypeReflection(Object), new TypeReflection(Json));
 
-  convert(object, TypeReflection targetReflection) {
+  Json convertTo(Object object, TypeReflection targetReflection) {
     var simplified = _convert(object);
     return new Json(JSON.encode(simplified));
   }
@@ -98,10 +112,10 @@ class ObjectToJson extends Converter {
   }
 }
 
-class JsonToObject extends Converter {
+class JsonToObject extends ConverterBase<Json, Object> {
   JsonToObject() : super(new TypeReflection(Json), new TypeReflection(Object));
 
-  convert(Json json, TypeReflection targetReflection) {
+  convertTo(Json json, TypeReflection targetReflection) {
     var decoded = JSON.decode(json.toString());
     return _convert(decoded, targetReflection);
   }
