@@ -102,8 +102,8 @@ class JsonToObject extends Converter {
   JsonToObject() : super(new TypeReflection(Json), new TypeReflection(Object));
 
   convert(Json json, TypeReflection targetReflection) {
-    Map map = JSON.decode(json.toString());
-    return _convert(map, targetReflection);
+    var decoded = JSON.decode(json.toString());
+    return _convert(decoded, targetReflection);
   }
 
   _convert(object, TypeReflection targetReflection) {
