@@ -7,6 +7,13 @@ abstract class Optional<T> {
     return value == null ? empty : new Present(value);
   }
 
+  factory Optional.ofIterable(Iterable<T> iterable) {
+    if(iterable != null && iterable.length > 1) {
+      throw new RangeError.range(iterable.length, 0, 1, 'iterable.length');
+    }
+    return iterable == null || iterable.isEmpty ? empty : new Present(iterable.first);
+  }
+
   T get();
 
   T orElse(T other);

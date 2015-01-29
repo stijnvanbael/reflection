@@ -28,7 +28,7 @@ class Conversion {
 }
 
 class Converters {
-  static List<Converter> converters = [];
+  static Set<Converter> converters = new Set();
 
   static Converter register(Type source, Type target, Transformation conversion) {
     Converter converter = new ConverterBase(new TypeReflection(source), new TypeReflection(target), conversion);
@@ -88,7 +88,7 @@ class ObjectToJson extends ConverterBase<Object, Json> {
   _convert(object) {
     if (object is DateTime) {
       return object.toString();
-    } else if (object == null || object is String || object is int || object is double || object is bool) {
+    } else if (object == null || object is String || object is num || object is bool) {
       return object;
     } else if (object is Iterable) {
       return new List.from(object.map((item) => _convert(item)));
