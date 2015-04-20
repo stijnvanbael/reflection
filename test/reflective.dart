@@ -21,6 +21,17 @@ main() {
       expect(reflection.arguments[1], dynamicReflection);
     });
 
+    test('Transitive fields', () {
+      TypeReflection<Project> reflection = new TypeReflection(Project);
+      FieldReflection field = reflection.field('lead.name');
+      Project project = new Project();
+      project.lead = new Employee('John');
+      expect(field.value(project), 'John');
+
+      field.set(project, 'Emma');
+      expect(project.lead.name, 'Emma');
+    });
+
     test('Reuse of reflections', () {
       // TODO
     });
@@ -32,7 +43,7 @@ main() {
     });
 
     Json requestJson = new Json('{"headers":{"sender":"Deep Thought","accepts":"any gratitude"},"path":"/solution"}');
-    Json departmentJson = new Json('{"employees":[{"projects":null,"dateOfBirth":"1974-03-17 00:00:00.000","name":"Mark"},{"projects":null,"dateOfBirth":"1982-11-08 00:00:00.000","name":"Sophie"},{"projects":{"Scrum Master":{"storyPoints":135.5,"ongoing":false,"name":"Payment Platform"},"Lead Developer":{"storyPoints":307.0,"ongoing":true,"name":"Loyalty"}},"dateOfBirth":"1979-07-22 00:00:00.000","name":"Ellen"}],"name":"Development"}');
+    Json departmentJson = new Json('{"employees":[{"projects":null,"dateOfBirth":"1974-03-17 00:00:00.000","name":"Mark"},{"projects":null,"dateOfBirth":"1982-11-08 00:00:00.000","name":"Sophie"},{"projects":{"Scrum Master":{"lead":null,"storyPoints":135.5,"ongoing":false,"name":"Payment Platform"},"Lead Developer":{"lead":null,"storyPoints":307.0,"ongoing":true,"name":"Loyalty"}},"dateOfBirth":"1979-07-22 00:00:00.000","name":"Ellen"}],"name":"Development"}');
     Request request = new Request('/solution', {'sender': 'Deep Thought', 'accepts': 'any gratitude'});
     Department department = new Department('Development', [
         new Employee('Mark', DateTime.parse('1974-03-17')),
@@ -107,6 +118,7 @@ class Project {
   String name;
   bool ongoing;
   double storyPoints;
+  Employee lead;
 
   Project([this.name, this.ongoing, this.storyPoints]);
 

@@ -43,12 +43,23 @@ class TypeReflection<T> {
     ClassMirror classMirror = _mirror;
     return Maps.index(classMirror.declarations.keys
     .where((key) => classMirror.declarations[key] is VariableMirror)
-    .map((key) => new FieldReflection(key, classMirror.declarations[key], classMirror.instanceMembers[key])),
+    .map((key) => new SimpleFieldReflection(key, classMirror.declarations[key], classMirror.instanceMembers[key])),
         (field) => field.name);
   }
 
   Map<String, FieldReflection> fieldsWith(Type metadata) {
     return Maps.where(fields, (name, field) => field.has(metadata));
+  }
+
+  FieldReflection field(String name) {
+    List<String> components = name.split('.');
+    if (components.length == 1) return fields[components[0]];
+    FieldReflection field = null;
+    components.forEach((c) {
+      if (field == null) field = fields[c];
+      else field = new TransitiveFieldReflection(field, fields[c]);
+    });
+    return field;
   }
 
   bool sameOrSuper(other) {
@@ -89,12 +100,24 @@ class TypeReflection<T> {
 
 TypeReflection<dynamic> dynamicReflection = new TypeReflection(dynamic);
 
-class FieldReflection {
+abstract class FieldReflection {
+  bool has(Type metadata);
+
+  value(Object entity);
+
+  set(Object entity, value);
+
+  TypeReflection get type;
+
+  String get name;
+}
+
+class SimpleFieldReflection extends FieldReflection {
   Symbol _symbol;
   VariableMirror _variable;
   MethodMirror _accessor;
 
-  FieldReflection(this._symbol, this._variable, this._accessor);
+  SimpleFieldReflection(this._symbol, this._variable, this._accessor);
 
   bool has(Type metadata) => _variable.metadata
   .firstWhere((instance) => instance.type.reflectedType == metadata,
@@ -111,6 +134,28 @@ class FieldReflection {
   String toString() => name;
 
   bool operator ==(o) => o is FieldReflection && _variable.qualifiedName == o._variable.qualifiedName && _symbol == o._symbol;
+}
+
+class TransitiveFieldReflection extends FieldReflection {
+  FieldReflection _source;
+  FieldReflection _target;
+
+  TransitiveFieldReflection(this._source, this._target);
+
+  bool has(Type metadata) => _source.has(metadata);
+
+  value(Object entity) {
+    var sourceValue = _source.value(entity);
+    if (sourceValue == null) return null;
+    return _target.value(sourceValue);
+  }
+
+  set(Object entity, value) => _target.set(_source.value(entity), value);
+
+  TypeReflection get type => _source.type;
+
+  String get name => _source.name + '.' + _target.name;
+
 }
 
 class Maps {
@@ -136,5 +181,5 @@ class Maps {
 }
 
 class Objects {
-  static int hash(List toHash) =>  toHash.fold(17, (e1, e2) => (e1 != null ? e1.hashCode : 1) * 37 + (e2 != null ? e2.hashCode : 1));
+  static int hash(List toHash) => toHash.fold(17, (e1, e2) => (e1 != null ? e1.hashCode : 1) * 37 + (e2 != null ? e2.hashCode : 1));
 }
