@@ -20,7 +20,7 @@ class Conversion {
 
   toReflection(TypeReflection targetReflection) {
     Converter converter = Converters.find(source, targetReflection);
-    if(converter is ConverterBase) {
+    if (converter is ConverterBase) {
       return converter.convertTo(object, targetReflection);
     }
     return converter.convert(object);
@@ -28,23 +28,32 @@ class Conversion {
 }
 
 class Converters {
-  static Set<Converter> converters = new Set();
+  static Set<ConverterBase> converters = new Set();
 
-  static Converter register(Type source, Type target, Transformation conversion) {
-    Converter converter = new ConverterBase(new TypeReflection(source), new TypeReflection(target), conversion);
+  static ConverterBase register(Type source, Type target, Transformation conversion) {
+    ConverterBase converter = new ConverterBase(new TypeReflection(source), new TypeReflection(target), conversion);
     converters.add(converter);
     return converter;
   }
 
-  static Converter add(Converter converter) {
+  static ConverterBase add(ConverterBase converter) {
     converters.add(converter);
     return converter;
   }
 
-  static Converter find(TypeReflection source, TypeReflection target) {
-    return converters.firstWhere(
-            (c) => c.source.sameOrSuper(source) && c.target.sameOrSuper(target),
-        orElse: () => throw new ConverterException('No converter found from ' + source.toString() + ' to ' + target.toString() + '.'));
+  static ConverterBase find(TypeReflection source, TypeReflection target) {
+    Map<int, ConverterBase> scored = {};
+    converters.forEach((c) {
+      int score = ((c.source == source) ? 2 :
+          (c.source.sameOrSuper(source)) ? 1 : -2)
+        + ((c.target == target) ? 2 :
+          (c.target.sameOrSuper(target)) ? 1 : -2);
+      if(score >= 2) scored[score] = c;
+    });
+    if(scored.containsKey(4)) return scored[4];
+    if(scored.containsKey(3)) return scored[3];
+    if(scored.containsKey(2)) return scored[2];
+    throw new ConverterException('No converter found from ' + source.toString() + ' to ' + target.toString() + '.');
   }
 }
 
@@ -102,7 +111,7 @@ class ObjectToJson extends ConverterBase<Object, Json> {
       return type.fields.values
       .where((field) => !field.has(Transient))
       .map((field) => {
-          field.name: _convert(field.value(object))
+        field.name: _convert(field.value(object))
       })
       .reduce((Map m1, Map m2) {
         m2.addAll(m1);
