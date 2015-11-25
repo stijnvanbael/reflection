@@ -1,4 +1,5 @@
 # Created by .gitignore support plugin (hsz.mobi)
-test/packages
+packages
 pubspec.lock
 *.iml
+.idea

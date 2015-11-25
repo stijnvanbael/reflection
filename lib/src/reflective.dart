@@ -1,5 +1,7 @@
 part of reflective;
 
+reflect(Type type) => new TypeReflection(type);
+
 class TypeReflection<T> {
   TypeMirror _mirror;
   List<TypeReflection> _arguments;
@@ -7,7 +9,8 @@ class TypeReflection<T> {
   TypeReflection(Type type, [List<Type> arguments]) {
     _mirror = reflectType(type);
     if (arguments != null) {
-      _arguments = new List.from(arguments.map((arg) => new TypeReflection(arg)));
+      _arguments =
+      new List.from(arguments.map((arg) => new TypeReflection(arg)));
     } else {
       _getArgumentsFromMirror();
     }
@@ -42,8 +45,9 @@ class TypeReflection<T> {
     }
     ClassMirror classMirror = _mirror;
     return Maps.index(classMirror.declarations.keys
-    .where((key) => classMirror.declarations[key] is VariableMirror)
-    .map((key) => new SimpleFieldReflection(key, classMirror.declarations[key], classMirror.instanceMembers[key])),
+        .where((key) => classMirror.declarations[key] is VariableMirror)
+        .map((key) => new SimpleFieldReflection(
+        key, classMirror.declarations[key], classMirror.instanceMembers[key])),
         (field) => field.name);
   }
 
@@ -90,12 +94,15 @@ class TypeReflection<T> {
       throw 'Cannot construct ' + name;
     }
     ClassMirror classMirror = _mirror;
-    return classMirror.newInstance(MirrorSystem.getSymbol(constructor), args, namedArgs).reflectee;
+    return classMirror
+        .newInstance(MirrorSystem.getSymbol(constructor), args, namedArgs)
+        .reflectee;
   }
 
   String toString() => name;
 
-  bool operator ==(o) => o is TypeReflection && _mirror.qualifiedName == o._mirror.qualifiedName;
+  bool operator ==(o) =>
+      o is TypeReflection && _mirror.qualifiedName == o._mirror.qualifiedName;
 }
 
 TypeReflection<dynamic> dynamicReflection = new TypeReflection(dynamic);
@@ -120,20 +127,25 @@ class SimpleFieldReflection extends FieldReflection {
   SimpleFieldReflection(this._symbol, this._variable, this._accessor);
 
   bool has(Type metadata) => _variable.metadata
-  .firstWhere((instance) => instance.type.reflectedType == metadata,
-  orElse: () => null) != null;
+      .firstWhere((instance) => instance.type.reflectedType == metadata,
+      orElse: () => null) != null;
 
-  value(Object entity) => reflect(entity).getField(_symbol).reflectee;
+  value(Object entity) => reflect(entity)
+      .getField(_symbol)
+      .reflectee;
 
   set(Object entity, value) => reflect(entity).setField(_symbol, value);
 
-  TypeReflection get type => new TypeReflection.fromMirror(_accessor.returnType);
+  TypeReflection get type =>
+      new TypeReflection.fromMirror(_accessor.returnType);
 
   String get name => MirrorSystem.getName(_symbol);
 
   String toString() => name;
 
-  bool operator ==(o) => o is FieldReflection && _variable.qualifiedName == o._variable.qualifiedName && _symbol == o._symbol;
+  bool operator ==(o) => o is FieldReflection &&
+      _variable.qualifiedName == o._variable.qualifiedName &&
+      _symbol == o._symbol;
 }
 
 class TransitiveFieldReflection extends FieldReflection {
@@ -181,5 +193,7 @@ class Maps {
 }
 
 class Objects {
-  static int hash(List toHash) => toHash.fold(17, (e1, e2) => (e1 != null ? e1.hashCode : 1) * 37 + (e2 != null ? e2.hashCode : 1));
+  static int hash(List toHash) => toHash.fold(
+      17, (e1, e2) => (e1 != null ? e1.hashCode : 1) * 37 +
+      (e2 != null ? e2.hashCode : 1));
 }
