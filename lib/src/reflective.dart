@@ -1,6 +1,8 @@
 part of reflective;
 
-reflect(Type type) => new TypeReflection(type);
+type(Type type) => new TypeReflection(type);
+
+instance(Object instance) => new TypeReflection.fromInstance(instance);
 
 class TypeReflection<T> {
   TypeMirror _mirror;
