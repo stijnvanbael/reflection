@@ -3,3 +3,4 @@ packages
 pubspec.lock
 *.iml
 .idea
+.packages
