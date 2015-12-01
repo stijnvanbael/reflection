@@ -9,4 +9,6 @@ Examples:
 
     TypeReflection typeOfEmployeeName = type(Employee).field('name').type;
 
-    Employee employee = type(Employee).construct(name: 'John Doe', email: 'john@doe.org');
+    Employee employee = type(Employee).construct(
+        name: 'John Doe', 
+        email: 'john@doe.org');

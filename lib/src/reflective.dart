@@ -45,16 +45,15 @@ class TypeReflection<T> {
   String get name => MirrorSystem.getName(_mirror.simpleName);
   String get fullName => MirrorSystem.getName(_mirror.qualifiedName);
 
-  bool isEnum() => _mirror is ClassMirror ? (_mirror as ClassMirror).isEnum : false;
+  bool get isEnum => _mirror is ClassMirror ? (_mirror as ClassMirror).isEnum : false;
 
-  List getEnumValues()
-  {
-    if (!isEnum() || _mirror is !ClassMirror)
+  List get enumValues {
+    if (!isEnum || _mirror is !ClassMirror)
       return null;
     return (_mirror as ClassMirror).getField(#values).reflectee;
   }
 
-  List<TypeReflection> getTypeArguments() => _arguments;
+  List<TypeReflection> get typeArguments => _arguments;
 
   Map<String, FieldReflection> get fields {
     if (!(_mirror is ClassMirror)) {

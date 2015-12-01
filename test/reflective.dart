@@ -1,6 +1,6 @@
 library reflective.test;
 
-import 'package:unittest/unittest.dart';
+import 'package:test/test.dart';
 import 'package:reflective/reflective.dart';
 import 'package:collection/equality.dart';
 
@@ -32,6 +32,22 @@ main() {
       expect(project.lead.name, 'Emma');
     });
 
+    test('Names', () {
+      TypeReflection<Project> reflection = new TypeReflection(Project);
+      expect(reflection.name, 'Project');
+      expect(reflection.fullName, 'reflective.test.Project');
+    });
+
+    test('Enums',(){
+      TypeReflection<Status> status = new TypeReflection(Status);
+      expect(status.isEnum, true);
+      expect(status.enumValues, Status.values);
+
+      TypeReflection<Project> project = new TypeReflection(Project);
+      expect(project.isEnum, false);
+      expect(project.enumValues, null);
+    });
+
     test('Reuse of reflections', () {
       // TODO
     });
@@ -43,7 +59,9 @@ main() {
     });
 
     Json requestJson = new Json('{"headers":{"sender":"Deep Thought","accepts":"any gratitude"},"path":"/solution"}');
-    Json departmentJson = new Json('{"employees":[{"projects":null,"dateOfBirth":"1974-03-17 00:00:00.000","name":"Mark"},{"projects":null,"dateOfBirth":"1982-11-08 00:00:00.000","name":"Sophie"},{"projects":{"Scrum Master":{"lead":null,"storyPoints":135.5,"ongoing":false,"name":"Payment Platform"},"Lead Developer":{"lead":null,"storyPoints":307.0,"ongoing":true,"name":"Loyalty"}},"dateOfBirth":"1979-07-22 00:00:00.000","name":"Ellen"}],"name":"Development"}');
+    Json departmentJson = new Json('{"employees":[{"projects":null,"dateOfBirth":"1974-03-17 00:00:00.000","name":"Mark"},{"projects":null,"dateOfBirth":"1982-11-08 00:00:00.000","name":"Sophie"},'
+        '{"projects":{"Scrum Master":{"lead":null,"storyPoints":135.5,"ongoing":false,"name":"Payment Platform"},"Lead Developer":{"lead":null,"storyPoints":307.0,"ongoing":true,"name":"Loyalty"}},'
+        '"dateOfBirth":"1979-07-22 00:00:00.000","name":"Ellen"}],"name":"Development"}');
     Request request = new Request('/solution', {'sender': 'Deep Thought', 'accepts': 'any gratitude'});
     Department department = new Department('Development', [
         new Employee('Mark', DateTime.parse('1974-03-17')),
@@ -134,4 +152,8 @@ class Request {
   Request([this.path, this.headers]);
 
   bool operator ==(o) => o is Request && path == o.path && mapEq(headers, o.headers);
+}
+
+enum Status {
+  active, suspended, deleted
 }
