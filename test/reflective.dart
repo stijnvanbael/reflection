@@ -32,6 +32,31 @@ main() {
       expect(project.lead.name, 'Emma');
     });
 
+    test('Fields where', () {
+      TypeReflection<Employee> reflection = new TypeReflection(Employee);
+      Map<String, FieldReflection> fields = reflection.fieldsWhere((field) => field.type.rawType == String);
+      expect(fields, {
+        'name': reflection.field('name'),
+        'jobDescription': reflection.field('jobDescription'),
+        '_sessionId': reflection.field('_sessionId')
+      });
+    });
+
+    test('Private field', () {
+      TypeReflection<Employee> reflection = new TypeReflection(Employee);
+      FieldReflection sessionId = reflection.field('_sessionId');
+      FieldReflection name = reflection.field('name');
+      expect(sessionId.isPrivate, true);
+      expect(name.isPrivate, false);
+    });
+
+    test('Field metadata', () {
+      TypeReflection<Employee> reflection = new TypeReflection(Employee);
+      FieldReflection sessionId = reflection.field('_sessionId');
+      expect(sessionId.has(Transient), true);
+      expect(sessionId.metadata(Transient), [transient, transient]);
+    });
+
     test('Names', () {
       TypeReflection<Project> reflection = new TypeReflection(Project);
       expect(reflection.name, 'Project');
@@ -111,9 +136,10 @@ class Employee {
   String name;
   DateTime dateOfBirth;
   Map<Role, Project> projects;
-  @transient String sessionId;
+  @transient String jobDescription;
+  @transient @transient String _sessionId;
 
-  Employee([this.name, this.dateOfBirth, this.projects, this.sessionId]);
+  Employee([this.name, this.dateOfBirth, this.projects, this._sessionId]);
 
   bool operator ==(o) => o is Employee && name == o.name && dateOfBirth == o.dateOfBirth && mapEq(projects, o.projects);
 

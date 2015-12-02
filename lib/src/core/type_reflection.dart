@@ -6,52 +6,45 @@ TypeReflection instance(Object instance) => new TypeReflection.fromInstance(inst
 
 TypeReflection<dynamic> dynamicReflection = new TypeReflection(dynamic);
 
-class TypeReflection<T> {
-  TypeMirror _mirror;
+class TypeReflection<T> extends AbstractReflection<TypeMirror> {
   List<TypeReflection> _arguments;
 
-  TypeReflection(Type type, [List<Type> arguments]) {
-    _mirror = reflectType(type);
-    if (arguments != null) {
+  TypeReflection(Type type, [List<Type> arguments]) : super(reflectType(type)) {
+    if (arguments != null)
       _arguments = new List.from(arguments.map((arg) => new TypeReflection(arg)));
-    } else {
+    else
       _getArgumentsFromMirror();
-    }
   }
 
-  TypeReflection.fromInstance(instance) {
-    _mirror = reflect(instance).type;
+  TypeReflection.fromInstance(instance) : super(reflect(instance).type) {
     _getArgumentsFromMirror();
   }
 
-  TypeReflection.fromMirror(this._mirror) {
+  TypeReflection.fromMirror(TypeMirror mirror) : super(mirror) {
     _getArgumentsFromMirror();
   }
 
-  TypeReflection.fromFullName(String fullName) {
-    _mirror = _getClassMirrorByName(fullName);
+  TypeReflection.fromFullName(String fullName) : super(_getClassMirrorByName(fullName)) {
     _getArgumentsFromMirror();
   }
 
   _getArgumentsFromMirror() {
     _arguments = new List.from(_mirror.typeArguments.map((m) {
-      if (m.reflectedType == dynamic) {
+      if (m.reflectedType == dynamic)
         return dynamicReflection;
-      }
       return new TypeReflection.fromMirror(m);
     }));
   }
 
-  Type get type => _mirror.reflectedType;
-
-  String get name => MirrorSystem.getName(_mirror.simpleName);
-  String get fullName => MirrorSystem.getName(_mirror.qualifiedName);
+  Type get rawType => _mirror.reflectedType;
 
   bool get isEnum => _mirror is ClassMirror ? (_mirror as ClassMirror).isEnum : false;
 
   List get enumValues {
     if (!isEnum || _mirror is! ClassMirror) return null;
-    return (_mirror as ClassMirror).getField(#values).reflectee;
+    return (_mirror as ClassMirror)
+        .getField(#values)
+        .reflectee;
   }
 
   List<TypeReflection> get typeArguments => _arguments;
@@ -67,8 +60,12 @@ class TypeReflection<T> {
         (field) => field.name);
   }
 
+  Map<String, FieldReflection> fieldsWhere(bool test(FieldReflection field)) {
+    return Maps.where(fields, (key, value) => test(value));
+  }
+
   Map<String, FieldReflection> fieldsWith(Type metadata) {
-    return Maps.where(fields, (name, field) => field.has(metadata));
+    return fieldsWhere((field) => field.has(metadata));
   }
 
   FieldReflection field(String name) {
@@ -109,14 +106,16 @@ class TypeReflection<T> {
       throw 'Cannot construct ' + fullName;
     }
     ClassMirror classMirror = _mirror;
-    return classMirror.newInstance(MirrorSystem.getSymbol(constructor), args, namedArgs).reflectee;
+    return classMirror
+        .newInstance(MirrorSystem.getSymbol(constructor), args, namedArgs)
+        .reflectee;
   }
 
   String toString() => fullName;
 
   bool operator ==(o) => o is TypeReflection && _mirror.qualifiedName == o._mirror.qualifiedName;
 
-  ClassMirror _getClassMirrorByName(String className) {
+  static ClassMirror _getClassMirrorByName(String className) {
     if (className == null) {
       return null;
     }
