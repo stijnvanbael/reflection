@@ -1,4 +1,5 @@
-part of reflective.reflective;
+import 'dart:mirrors';
+import 'package:reflective/src/core.dart';
 
 abstract class FieldReflection {
   bool has(Type metadata);

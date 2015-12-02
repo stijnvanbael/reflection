@@ -1,4 +1,8 @@
-part of reflective;
+library reflective.convert;
+
+import 'dart:convert';
+import 'package:reflective/src/core.dart';
+import 'package:reflective/src/util.dart';
 
 typedef dynamic Transformation(dynamic object);
 
