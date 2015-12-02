@@ -1,6 +1,4 @@
-import 'dart:mirrors';
-import 'package:reflective/src/core.dart';
-import 'package:reflective/src/util.dart';
+part of reflective.core;
 
 TypeReflection type(Type type) => new TypeReflection(type);
 

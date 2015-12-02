@@ -1,4 +1,7 @@
 library reflective.core;
 
-export 'package:reflective/src/core/type_reflection.dart';
-export 'package:reflective/src/core/field_reflection.dart';
+import 'dart:mirrors';
+import 'package:reflective/src/util.dart';
+
+part 'core/type_reflection.dart';
+part 'core/field_reflection.dart';
