@@ -1,5 +1,11 @@
 part of reflective.reflective;
 
+TypeReflection type(Type type) => new TypeReflection(type);
+
+TypeReflection instance(Object instance) => new TypeReflection.fromInstance(instance);
+
+TypeReflection<dynamic> dynamicReflection = new TypeReflection(dynamic);
+
 class TypeReflection<T> {
   TypeMirror _mirror;
   List<TypeReflection> _arguments;
