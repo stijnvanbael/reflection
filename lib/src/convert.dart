@@ -44,15 +44,13 @@ class Converters {
   static ConverterBase find(TypeReflection source, TypeReflection target) {
     Map<int, ConverterBase> scored = {};
     converters.forEach((c) {
-      int score = ((c.source == source) ? 2 :
-          (c.source.sameOrSuper(source)) ? 1 : -2)
-        + ((c.target == target) ? 2 :
-          (c.target.sameOrSuper(target)) ? 1 : -2);
-      if(score >= 2) scored[score] = c;
+      int score = ((c.source == source) ? 2 : (c.source.sameOrSuper(source)) ? 1 : -2) +
+          ((c.target == target) ? 2 : (c.target.sameOrSuper(target)) ? 1 : -2);
+      if (score >= 2) scored[score] = c;
     });
-    if(scored.containsKey(4)) return scored[4];
-    if(scored.containsKey(3)) return scored[3];
-    if(scored.containsKey(2)) return scored[2];
+    if (scored.containsKey(4)) return scored[4];
+    if (scored.containsKey(3)) return scored[3];
+    if (scored.containsKey(2)) return scored[2];
     throw new ConverterException('No converter found from ' + source.toString() + ' to ' + target.toString() + '.');
   }
 }
@@ -102,18 +100,15 @@ class ObjectToJson extends ConverterBase<Object, Json> {
     } else if (object is Iterable) {
       return new List.from(object.map((item) => _convert(item)));
     } else if (object is Map) {
-      Map map = {
-      };
+      Map map = {};
       object.keys.forEach((k) => map[k.toString()] = _convert(object[k]));
       return map;
     } else {
       TypeReflection type = new TypeReflection.fromInstance(object);
       return type.fields.values
-      .where((field) => !field.has(Transient))
-      .map((field) => {
-        field.name: _convert(field.value(object))
-      })
-      .reduce((Map m1, Map m2) {
+          .where((field) => !field.has(Transient))
+          .map((field) => {field.name: _convert(field.value(object))})
+          .reduce((Map m1, Map m2) {
         m2.addAll(m1);
         return m2;
       });
@@ -134,8 +129,7 @@ class JsonToObject extends ConverterBase<Json, Object> {
       if (targetReflection.sameOrSuper(Map)) {
         TypeReflection keyType = targetReflection.arguments[0];
         TypeReflection valueType = targetReflection.arguments[1];
-        Map map = {
-        };
+        Map map = {};
         object.keys.forEach((k) {
           var newKey = keyType.sameOrSuper(k) ? k : keyType.construct(args: [k]);
           map[newKey] = _convert(object[k], valueType);
@@ -144,11 +138,10 @@ class JsonToObject extends ConverterBase<Json, Object> {
       } else {
         var instance = targetReflection.construct();
         object.keys.forEach((k) {
-          if (targetReflection.fields[k] == null)
-            throw new JsonException('Unknown property: ' + targetReflection.fullName + '.' + k);
+          if (targetReflection.fields[k] ==
+              null) throw new JsonException('Unknown property: ' + targetReflection.fullName + '.' + k);
         });
-        Maps.forEach(targetReflection.fields,
-            (name, field) => field.set(instance, _convert(object[name], field.type)));
+        targetReflection.fields.forEach((name, field) => field.set(instance, _convert(object[name], field.type)));
         return instance;
       }
     } else if (object is Iterable) {

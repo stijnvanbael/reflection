@@ -51,14 +51,30 @@ class TypeReflection<T> {
   List<TypeReflection> get typeArguments => _arguments;
 
   Map<String, FieldReflection> get fields {
-    if (!(_mirror is ClassMirror)) {
+    if (_mirror is! ClassMirror) {
       return {};
     }
-    ClassMirror classMirror = _mirror;
-    return Maps.index(
-        classMirror.declarations.keys.where((key) => classMirror.declarations[key] is VariableMirror).map(
-            (key) => new SimpleFieldReflection(key, classMirror.declarations[key], classMirror.instanceMembers[key])),
-        (field) => field.name);
+
+    var fields = _getAllFields(_mirror);
+    return new Map.fromIterable(fields, key: (field) => field.name);
+  }
+
+  static ClassMirror _objectMirror = reflectClass(Object);
+
+  Iterable<SimpleFieldReflection> _getAllFields(ClassMirror classMirror) sync* {
+    var variableSymbols = classMirror.declarations.keys.where((key) => classMirror.declarations[key] is VariableMirror);
+
+    for (var variableSymbol in variableSymbols) {
+      yield _getSimpleFieldReflection(variableSymbol, classMirror);
+    }
+
+    if (classMirror.superclass != _objectMirror) {
+      yield* _getAllFields(classMirror.superclass);
+    }
+  }
+
+  static SimpleFieldReflection _getSimpleFieldReflection(key, ClassMirror classMirror) {
+    return new SimpleFieldReflection(key, classMirror.declarations[key], classMirror.instanceMembers[key]);
   }
 
   Map<String, FieldReflection> fieldsWith(Type metadata) {
@@ -99,9 +115,8 @@ class TypeReflection<T> {
   List<TypeReflection> get arguments => _arguments;
 
   T construct({Map namedArgs: const {}, List args: const [], String constructor: ''}) {
-    if (!(_mirror is ClassMirror)) {
-      throw 'Cannot construct ' + fullName;
-    }
+    if (_mirror is! ClassMirror) throw 'Cannot construct ' + fullName;
+
     ClassMirror classMirror = _mirror;
     return classMirror.newInstance(MirrorSystem.getSymbol(constructor), args, namedArgs).reflectee;
   }
@@ -130,10 +145,6 @@ class TypeReflection<T> {
       library = currentMirrorSystem().findLibrary(new Symbol(libraryName));
     }
 
-    if (library == null) {
-      return null;
-    }
-
-    return library.declarations[new Symbol(name)];
+    return library == null ? null : library.declarations[new Symbol(name)];
   }
 }
