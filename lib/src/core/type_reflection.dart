@@ -1,4 +1,12 @@
-part of reflective.reflective;
+import 'dart:mirrors';
+import 'package:reflective/src/core.dart';
+import 'package:reflective/src/util.dart';
+
+TypeReflection type(Type type) => new TypeReflection(type);
+
+TypeReflection instance(Object instance) => new TypeReflection.fromInstance(instance);
+
+TypeReflection<dynamic> dynamicReflection = new TypeReflection(dynamic);
 
 class TypeReflection<T> {
   TypeMirror _mirror;

@@ -1,4 +1,29 @@
-part of reflective;
+library reflective.util;
+
+class Objects {
+  static int hash(List toHash) =>
+      toHash.fold(17, (e1, e2) => (e1 != null ? e1.hashCode : 1) * 37 + (e2 != null ? e2.hashCode : 1));
+}
+
+class Maps {
+  static Map index(Iterable iterable, indexer(key)) {
+    Map result = {};
+    iterable.forEach((i) => result[indexer(i)] = i);
+    return result;
+  }
+
+  static Map where(Map map, predicate(key, value)) {
+    Map result = {};
+    forEach(map, (k, v) {
+      if (predicate(k, v)) result[k] = v;
+    });
+    return result;
+  }
+
+  static forEach(Map map, function(key, value)) {
+    map.keys.forEach((k) => function(k, map[k]));
+  }
+}
 
 abstract class Optional<T> {
   const Optional();
@@ -8,7 +33,7 @@ abstract class Optional<T> {
   }
 
   factory Optional.ofIterable(Iterable<T> iterable) {
-    if(iterable != null && iterable.length > 1) {
+    if (iterable != null && iterable.length > 1) {
       throw new RangeError.range(iterable.length, 0, 1, 'iterable.length');
     }
     return iterable == null || iterable.isEmpty ? empty : new Present(iterable.first);
