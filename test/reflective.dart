@@ -73,6 +73,14 @@ main() {
       expect(project.enumValues, null);
     });
 
+    test('Returns fields on base classes', () {
+      var fields = new TypeReflection(MainClass).fields;
+
+      expect(fields.keys.any((k) => k == "id"), true);
+      expect(fields.keys.any((k) => k == "name"), true);
+      expect(fields.keys.any((k) => k == "works"), true);
+    });
+
     test('Reuse of reflections', () {
       // TODO
     });
@@ -178,6 +186,19 @@ class Request {
   Request([this.path, this.headers]);
 
   bool operator ==(o) => o is Request && path == o.path && mapEq(headers, o.headers);
+}
+
+class BaseClass {
+  int id;
+}
+
+class SubClass extends BaseClass {
+  String name;
+}
+
+
+class MainClass extends SubClass {
+  bool works;
 }
 
 enum Status {
