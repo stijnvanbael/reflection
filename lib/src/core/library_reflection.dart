@@ -27,4 +27,5 @@ class LibraryReflection
 
 	List<TypeReflection> get types => _types;
 
+	String get name => MirrorSystem.getName(_library.qualifiedName);
 }

@@ -116,6 +116,11 @@ main() {
       expect(libraryReflection.types.any( (x) => x.rawType == TestBaseType ), true);
 
     });
+
+    test('Name', () {
+      var libraryReflection = new LibraryReflection('reflective.test_library');
+      expect(libraryReflection.name, 'reflective.test_library');
+    });
   });
 
   group('Conversion', () {
