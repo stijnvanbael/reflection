@@ -3,6 +3,7 @@ library reflective.test;
 import 'package:test/test.dart';
 import 'package:reflective/reflective.dart';
 import 'package:collection/equality.dart';
+import 'test_library.dart';
 
 
 main() {
@@ -86,6 +87,17 @@ main() {
     });
   });
 
+  group('Library Reflection', () {
+    test('Types', (){
+      var libraryReflection = new LibraryReflection('reflective.test_library');
+      expect(libraryReflection.types.any( (x) => x.rawType == TestType1 ), true);
+      expect(libraryReflection.types.any( (x) => x.rawType == TestType2 ), true);
+      expect(libraryReflection.types.any( (x) => x.rawType == TestType3 ), true);
+      expect(libraryReflection.types.any( (x) => x.rawType == TestBaseType ), true);
+
+    });
+  });
+
   group('Conversion', () {
     setUp(() {
       installJsonConverters();
@@ -125,6 +137,7 @@ main() {
     });
   });
 }
+
 
 Function listEq = const ListEquality().equals;
 Function mapEq = const MapEquality().equals;
