@@ -82,6 +82,21 @@ main() {
       expect(fields.keys.any((k) => k == "works"), true);
     });
 
+    test('isAbstract', () {
+      var baseType = type(AbstractBaseClass);
+      expect(baseType.isAbstract, true);
+    });
+
+    test('Superclass', () {
+      var subclass = type(OtherSubclass);
+      expect(subclass.superclass.name, 'AbstractBaseClass');
+    });
+
+    test('No superclass', () {
+      var departmentType = type(Department);
+      expect(departmentType.superclass.rawType, Object);
+    });
+
     test('Reuse of reflections', () {
       // TODO
     });
@@ -216,4 +231,13 @@ class MainClass extends SubClass {
 
 enum Status {
   active, suspended, deleted
+}
+
+abstract class AbstractBaseClass {
+
+}
+
+class OtherSubclass extends AbstractBaseClass
+{
+
 }

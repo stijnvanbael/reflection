@@ -128,6 +128,10 @@ class TypeReflection<T> extends AbstractReflection<TypeMirror> {
 
   String toString() => fullName;
 
+  bool get isAbstract => _mirror is ClassMirror && (_mirror as ClassMirror).isAbstract;
+
+  TypeReflection get superclass => _mirror is ClassMirror && ( _mirror as ClassMirror ).superclass != null ? new TypeReflection(( _mirror as ClassMirror ).superclass.reflectedType) : null;
+
   bool operator ==(o) => o is TypeReflection && _mirror.qualifiedName == o._mirror.qualifiedName;
 
   static ClassMirror _getClassMirrorByName(String className) {
