@@ -3,6 +3,7 @@ library reflective.test;
 import 'package:test/test.dart';
 import 'package:reflective/reflective.dart';
 import 'package:collection/equality.dart';
+import 'test_library.dart';
 
 
 main() {
@@ -81,8 +82,34 @@ main() {
       expect(fields.keys.any((k) => k == "works"), true);
     });
 
+    test('isAbstract', () {
+      var baseType = type(AbstractBaseClass);
+      expect(baseType.isAbstract, true);
+    });
+
+    test('Superclass', () {
+      var subclass = type(OtherSubclass);
+      expect(subclass.superclass.name, 'AbstractBaseClass');
+    });
+
+    test('No superclass', () {
+      var departmentType = type(Department);
+      expect(departmentType.superclass.rawType, Object);
+    });
+
     test('Reuse of reflections', () {
       // TODO
+    });
+  });
+
+  group('Library Reflection', () {
+    test('Types', (){
+      var libraryReflection = new LibraryReflection('reflective.test_library');
+      expect(libraryReflection.types.any( (x) => x.rawType == TestType1 ), true);
+      expect(libraryReflection.types.any( (x) => x.rawType == TestType2 ), true);
+      expect(libraryReflection.types.any( (x) => x.rawType == TestType3 ), true);
+      expect(libraryReflection.types.any( (x) => x.rawType == TestBaseType ), true);
+
     });
   });
 
@@ -125,6 +152,7 @@ main() {
     });
   });
 }
+
 
 Function listEq = const ListEquality().equals;
 Function mapEq = const MapEquality().equals;
@@ -203,4 +231,13 @@ class MainClass extends SubClass {
 
 enum Status {
   active, suspended, deleted
+}
+
+abstract class AbstractBaseClass {
+
+}
+
+class OtherSubclass extends AbstractBaseClass
+{
+
 }
