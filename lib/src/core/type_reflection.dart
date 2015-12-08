@@ -36,6 +36,8 @@ class TypeReflection<T> extends AbstractReflection<TypeMirror> {
     }));
   }
 
+  TypeReflection get mixin => new TypeReflection((_mirror as ClassMirror).mixin.reflectedType);
+
   Type get rawType => _mirror.reflectedType;
 
   bool get isEnum => _mirror is ClassMirror ? (_mirror as ClassMirror).isEnum : false;

@@ -97,6 +97,11 @@ main() {
       expect(departmentType.superclass.rawType, Object);
     });
 
+    test('With mixins', () {
+      var mixinType = type(ClassWithMixin);
+      expect(mixinType.superclass.mixin.rawType, AMixin);
+    });
+
     test('Reuse of reflections', () {
       // TODO
     });
@@ -240,4 +245,14 @@ abstract class AbstractBaseClass {
 class OtherSubclass extends AbstractBaseClass
 {
 
+}
+
+class ClassWithMixin extends AbstractBaseClass with AMixin
+{
+
+}
+
+class AMixin
+{
+  int mixinProperty;
 }
