@@ -10,6 +10,7 @@ class LibraryReflection
 	LibraryReflection.fromSymbol(Symbol libraryName)
 	{
 		_library = currentMirrorSystem().findLibrary(libraryName);
+		_loadTypes();
 	}
 
 	LibraryReflection(String libraryName) {
