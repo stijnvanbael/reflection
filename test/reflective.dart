@@ -102,6 +102,12 @@ main() {
       expect(mixinType.superclass.mixin.rawType, AMixin);
     });
 
+    test('Get library', () {
+      var typeReflection = type(TestType1);
+      expect(typeReflection.library.name, 'reflective.test_library');
+
+    });
+
     test('Reuse of reflections', () {
       // TODO
     });

@@ -28,6 +28,8 @@ class TypeReflection<T> extends AbstractReflection<TypeMirror> {
     _getArgumentsFromMirror();
   }
 
+  get library => new LibraryReflection.fromSymbol((_mirror as ClassMirror).owner.simpleName);
+
   _getArgumentsFromMirror() {
     _arguments = new List.from(_mirror.typeArguments.map((m) {
       if (m.reflectedType == dynamic)

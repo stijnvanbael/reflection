@@ -7,6 +7,11 @@ class LibraryReflection
 	LibraryMirror _library;
 	List<TypeReflection> _types;
 
+	LibraryReflection.fromSymbol(Symbol libraryName)
+	{
+		_library = currentMirrorSystem().findLibrary(libraryName);
+	}
+
 	LibraryReflection(String libraryName) {
 		if (libraryName.isEmpty) {
 			_library = currentMirrorSystem().isolate.rootLibrary;
