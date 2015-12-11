@@ -113,6 +113,18 @@ main() {
       expect(typeReflection.isGeneric, true);
     });
 
+    test( "Generic properties", ( )
+    {
+      var mirror = reflectClass(GenericTypeWithAProperty);
+      var typeReflection = new TypeReflection.fromMirror(mirror.originalDeclaration);
+      var field = typeReflection.fields["property"];
+      expect(field.isGeneric, true);
+
+      var otherTypeReflection = type(BaseClass);
+      field = otherTypeReflection.fields["id"];
+      expect(field.isGeneric, false);
+    } );
+
     test('Non generic type', (){
       var typeReflection = type(Role);
       expect(typeReflection.isGeneric, false);
@@ -299,4 +311,9 @@ class AMixin
 
 class GenericType<T>
 {
+}
+
+class GenericTypeWithAProperty<T>
+{
+  T property;
 }
