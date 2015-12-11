@@ -8,34 +8,56 @@ TypeReflection<dynamic> dynamicReflection = new TypeReflection(dynamic);
 
 class TypeReflection<T> extends AbstractReflection<TypeMirror> {
   List<TypeReflection> _arguments;
+  List<GenericArgumentReflection> _genericArguments;
 
   TypeReflection(Type type, [List<Type> arguments]) : super(reflectType(type)) {
-    if (arguments != null)
-      _arguments = new List.from(arguments.map((arg) => new TypeReflection(arg)));
+    if (arguments != null) _arguments = new List.from(arguments.map((arg) => new TypeReflection(arg)));
     else
-      _getArgumentsFromMirror();
+    {
+      _getArgumentsFromMirror( );
+      _getGenericArgumentsFromMirror();
+    }
   }
 
   TypeReflection.fromInstance(instance) : super(reflect(instance).type) {
     _getArgumentsFromMirror();
+    _getGenericArgumentsFromMirror();
   }
 
   TypeReflection.fromMirror(TypeMirror mirror) : super(mirror) {
     _getArgumentsFromMirror();
+    _getGenericArgumentsFromMirror();
   }
 
   TypeReflection.fromFullName(String fullName) : super(_getClassMirrorByName(fullName)) {
     _getArgumentsFromMirror();
+    _getGenericArgumentsFromMirror();
   }
 
   get library => new LibraryReflection.fromSymbol((_mirror as ClassMirror).owner.simpleName);
 
+  get isGeneric => (_mirror as ClassMirror).typeVariables.isNotEmpty;
+
   _getArgumentsFromMirror() {
     _arguments = new List.from(_mirror.typeArguments.map((m) {
-      if (m.reflectedType == dynamic)
-        return dynamicReflection;
-      return new TypeReflection.fromMirror(m);
+      return _getTypeReflectionForArgument(m);
     }));
+  }
+
+  _getGenericArgumentsFromMirror() {
+    _genericArguments = new List<GenericArgumentReflection>();
+    for (var i = 0; i < _mirror.typeVariables.length; i++)
+    {
+      var genericArgumentReflection = new GenericArgumentReflection()
+        ..name = MirrorSystem.getName(_mirror.typeVariables[i].simpleName);
+      if ( _mirror.typeArguments.length > i )
+        genericArgumentReflection.value = new TypeReflection.fromMirror(_mirror.typeArguments[i]);
+      _genericArguments.add(genericArgumentReflection);
+    }
+  }
+  TypeReflection _getTypeReflectionForArgument(TypeMirror m) {
+    if (m.reflectedType == dynamic) return dynamicReflection;
+    return new TypeReflection.fromMirror(m);
   }
 
   TypeReflection get mixin => new TypeReflection((_mirror as ClassMirror).mixin.reflectedType);
@@ -46,9 +68,7 @@ class TypeReflection<T> extends AbstractReflection<TypeMirror> {
 
   List get enumValues {
     if (!isEnum || _mirror is! ClassMirror) return null;
-    return (_mirror as ClassMirror)
-        .getField(#values)
-        .reflectee;
+    return (_mirror as ClassMirror).getField(#values).reflectee;
   }
 
   List<TypeReflection> get typeArguments => _arguments;
@@ -119,22 +139,25 @@ class TypeReflection<T> extends AbstractReflection<TypeMirror> {
     }
   }
 
+  @deprecated
   List<TypeReflection> get arguments => _arguments;
+
+  List<GenericArgumentReflection> get genericArguments => _genericArguments;
 
   T construct({Map namedArgs: const {}, List args: const [], String constructor: ''}) {
     if (_mirror is! ClassMirror) throw 'Cannot construct ' + fullName;
 
     ClassMirror classMirror = _mirror;
-    return classMirror
-        .newInstance(MirrorSystem.getSymbol(constructor), args, namedArgs)
-        .reflectee;
+    return classMirror.newInstance(MirrorSystem.getSymbol(constructor), args, namedArgs).reflectee;
   }
 
   String toString() => fullName;
 
   bool get isAbstract => _mirror is ClassMirror && (_mirror as ClassMirror).isAbstract;
 
-  TypeReflection get superclass => _mirror is ClassMirror && ( _mirror as ClassMirror ).superclass != null ? new TypeReflection(( _mirror as ClassMirror ).superclass.reflectedType) : null;
+  TypeReflection get superclass => _mirror is ClassMirror && (_mirror as ClassMirror).superclass != null
+      ? new TypeReflection((_mirror as ClassMirror).superclass.reflectedType)
+      : null;
 
   bool operator ==(o) => o is TypeReflection && _mirror.qualifiedName == o._mirror.qualifiedName;
 
@@ -160,4 +183,9 @@ class TypeReflection<T> extends AbstractReflection<TypeMirror> {
 
     return library == null ? null : library.declarations[new Symbol(name)];
   }
+}
+
+class GenericArgumentReflection {
+  String name;
+  TypeReflection value;
 }

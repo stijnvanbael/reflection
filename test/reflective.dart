@@ -4,6 +4,7 @@ import 'package:test/test.dart';
 import 'package:reflective/reflective.dart';
 import 'package:collection/equality.dart';
 import 'test_library.dart';
+import 'dart:mirrors';
 
 
 main() {
@@ -105,8 +106,36 @@ main() {
     test('Get library', () {
       var typeReflection = type(TestType1);
       expect(typeReflection.library.name, 'reflective.test_library');
-
     });
+
+    test('Generic types', () {
+      var typeReflection = type(GenericType);
+      expect(typeReflection.isGeneric, true);
+    });
+
+    test('Non generic type', (){
+      var typeReflection = type(Role);
+      expect(typeReflection.isGeneric, false);
+    });
+
+    test('Generic declaration', (){
+      ClassMirror typeMirror = reflectClass(GenericType);
+      var typeReflection = new TypeReflection.fromMirror(typeMirror.originalDeclaration);
+      expect(typeReflection.genericArguments.length, 1);
+      expect(typeReflection.genericArguments[0].name, "T");
+      expect(typeReflection.genericArguments[0].value, isNull);
+    });
+
+    test( "Instance of generic declaration", ( )
+    {
+      var instance = new GenericType<int>();
+      var typeReflection = new TypeReflection.fromInstance(instance);
+      expect(typeReflection.genericArguments.length, 1);
+      expect(typeReflection.genericArguments[0].name, "T");
+      expect(typeReflection.genericArguments[0].value, new TypeReflection(int));
+    } );
+
+
 
     test('Reuse of reflections', () {
       // TODO
@@ -266,4 +295,8 @@ class ClassWithMixin extends AbstractBaseClass with AMixin
 class AMixin
 {
   int mixinProperty;
+}
+
+class GenericType<T>
+{
 }
