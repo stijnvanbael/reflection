@@ -4,22 +4,23 @@ import 'package:test/test.dart';
 import 'package:reflective/reflective.dart';
 import 'package:collection/equality.dart';
 import 'test_library.dart';
+import 'dart:mirrors';
 
 
 main() {
   group('Reflection', () {
     test('Variable generic arguments', () {
       TypeReflection<Map<String, Project>> reflection = new TypeReflection(Map, [String, Project]);
-      expect(reflection.arguments.length, 2);
-      expect(reflection.arguments[0], new TypeReflection(String));
-      expect(reflection.arguments[1], new TypeReflection(Project));
+      expect(reflection.genericArguments.length, 2);
+      expect(reflection.genericArguments[0].value, new TypeReflection(String));
+      expect(reflection.genericArguments[1].value, new TypeReflection(Project));
     });
 
     test('Dynamic generic arguments', () {
       TypeReflection<Map> reflection = new TypeReflection.fromInstance({});
-      expect(reflection.arguments.length, 2);
-      expect(reflection.arguments[0], dynamicReflection);
-      expect(reflection.arguments[1], dynamicReflection);
+      expect(reflection.genericArguments.length, 2);
+      expect(reflection.genericArguments[0].value, dynamicReflection);
+      expect(reflection.genericArguments[1].value, dynamicReflection);
     });
 
     test('Transitive fields', () {
@@ -97,6 +98,57 @@ main() {
       expect(departmentType.superclass.rawType, Object);
     });
 
+    test('With mixins', () {
+      var mixinType = type(ClassWithMixin);
+      expect(mixinType.superclass.mixin.rawType, AMixin);
+    });
+
+    test('Get library', () {
+      var typeReflection = type(TestType1);
+      expect(typeReflection.library.name, 'reflective.test_library');
+    });
+
+    test('Generic types', () {
+      var typeReflection = type(GenericType);
+      expect(typeReflection.isGeneric, true);
+    });
+
+    test( "Generic properties", ( )
+    {
+      var mirror = reflectClass(GenericTypeWithAProperty);
+      var typeReflection = new TypeReflection.fromMirror(mirror.originalDeclaration);
+      var field = typeReflection.fields["property"];
+      expect(field.isGeneric, true);
+
+      var otherTypeReflection = type(BaseClass);
+      field = otherTypeReflection.fields["id"];
+      expect(field.isGeneric, false);
+    } );
+
+    test('Non generic type', (){
+      var typeReflection = type(Role);
+      expect(typeReflection.isGeneric, false);
+    });
+
+    test('Generic declaration', (){
+      ClassMirror typeMirror = reflectClass(GenericType);
+      var typeReflection = new TypeReflection.fromMirror(typeMirror.originalDeclaration);
+      expect(typeReflection.genericArguments.length, 1);
+      expect(typeReflection.genericArguments[0].name, "T");
+      expect(typeReflection.genericArguments[0].value, isNull);
+    });
+
+    test( "Instance of generic declaration", ( )
+    {
+      var instance = new GenericType<int>();
+      var typeReflection = new TypeReflection.fromInstance(instance);
+      expect(typeReflection.genericArguments.length, 1);
+      expect(typeReflection.genericArguments[0].name, "T");
+      expect(typeReflection.genericArguments[0].value, new TypeReflection(int));
+    } );
+
+
+
     test('Reuse of reflections', () {
       // TODO
     });
@@ -110,6 +162,11 @@ main() {
       expect(libraryReflection.types.any( (x) => x.rawType == TestType3 ), true);
       expect(libraryReflection.types.any( (x) => x.rawType == TestBaseType ), true);
 
+    });
+
+    test('Name', () {
+      var libraryReflection = new LibraryReflection('reflective.test_library');
+      expect(libraryReflection.name, 'reflective.test_library');
     });
   });
 
@@ -240,4 +297,23 @@ abstract class AbstractBaseClass {
 class OtherSubclass extends AbstractBaseClass
 {
 
+}
+
+class ClassWithMixin extends AbstractBaseClass with AMixin
+{
+
+}
+
+class AMixin
+{
+  int mixinProperty;
+}
+
+class GenericType<T>
+{
+}
+
+class GenericTypeWithAProperty<T>
+{
+  T property;
 }

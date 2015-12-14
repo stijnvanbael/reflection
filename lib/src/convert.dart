@@ -2,7 +2,6 @@ library reflective.convert;
 
 import 'dart:convert';
 import 'package:reflective/src/core.dart';
-import 'package:reflective/src/util.dart';
 
 typedef dynamic Transformation(dynamic object);
 
@@ -131,8 +130,8 @@ class JsonToObject extends ConverterBase<Json, Object> {
   _convert(object, TypeReflection targetReflection) {
     if (object is Map) {
       if (targetReflection.sameOrSuper(Map)) {
-        TypeReflection keyType = targetReflection.arguments[0];
-        TypeReflection valueType = targetReflection.arguments[1];
+        TypeReflection keyType = targetReflection.genericArguments[0].value;
+        TypeReflection valueType = targetReflection.genericArguments[1].value;
         Map map = {};
         object.keys.forEach((k) {
           var newKey = keyType.sameOrSuper(k) ? k : keyType.construct(args: [k]);
@@ -149,7 +148,7 @@ class JsonToObject extends ConverterBase<Json, Object> {
         return instance;
       }
     } else if (object is Iterable) {
-      TypeReflection itemType = targetReflection.arguments[0];
+      TypeReflection itemType = targetReflection.genericArguments[0].value;
       return new List.from(object.map((i) => _convert(i, itemType)));
     } else if (targetReflection.sameOrSuper(DateTime)) {
       return DateTime.parse(object);
