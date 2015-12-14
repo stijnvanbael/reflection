@@ -11,16 +11,16 @@ main() {
   group('Reflection', () {
     test('Variable generic arguments', () {
       TypeReflection<Map<String, Project>> reflection = new TypeReflection(Map, [String, Project]);
-      expect(reflection.arguments.length, 2);
-      expect(reflection.arguments[0], new TypeReflection(String));
-      expect(reflection.arguments[1], new TypeReflection(Project));
+      expect(reflection.genericArguments.length, 2);
+      expect(reflection.genericArguments[0].value, new TypeReflection(String));
+      expect(reflection.genericArguments[1].value, new TypeReflection(Project));
     });
 
     test('Dynamic generic arguments', () {
       TypeReflection<Map> reflection = new TypeReflection.fromInstance({});
-      expect(reflection.arguments.length, 2);
-      expect(reflection.arguments[0], dynamicReflection);
-      expect(reflection.arguments[1], dynamicReflection);
+      expect(reflection.genericArguments.length, 2);
+      expect(reflection.genericArguments[0].value, dynamicReflection);
+      expect(reflection.genericArguments[1].value, dynamicReflection);
     });
 
     test('Transitive fields', () {

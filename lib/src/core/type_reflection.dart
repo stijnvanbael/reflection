@@ -11,10 +11,14 @@ class TypeReflection<T> extends AbstractReflection<TypeMirror> {
   List<GenericArgumentReflection> _genericArguments;
 
   TypeReflection(Type type, [List<Type> arguments]) : super(reflectType(type)) {
-    if (arguments != null) _arguments = new List.from(arguments.map((arg) => new TypeReflection(arg)));
-    else
-    {
-      _getArgumentsFromMirror( );
+    if (arguments != null) {
+      _getGenericArgumentsFromMirror();
+      for (var i = 0; i < _genericArguments.length; i++) {
+        if (arguments.length > i) _genericArguments[i].value = new TypeReflection(arguments[i]);
+      }
+      _arguments = new List.from(arguments.map((arg) => new TypeReflection(arg)));
+    } else {
+      _getArgumentsFromMirror();
       _getGenericArgumentsFromMirror();
     }
   }
@@ -46,15 +50,15 @@ class TypeReflection<T> extends AbstractReflection<TypeMirror> {
 
   _getGenericArgumentsFromMirror() {
     _genericArguments = new List<GenericArgumentReflection>();
-    for (var i = 0; i < _mirror.typeVariables.length; i++)
-    {
+    for (var i = 0; i < _mirror.typeVariables.length; i++) {
       var genericArgumentReflection = new GenericArgumentReflection()
         ..name = MirrorSystem.getName(_mirror.typeVariables[i].simpleName);
-      if ( _mirror.typeArguments.length > i )
-        genericArgumentReflection.value = new TypeReflection.fromMirror(_mirror.typeArguments[i]);
+      if (_mirror.typeArguments.length > i) genericArgumentReflection.value =
+          new TypeReflection.fromMirror(_mirror.typeArguments[i]);
       _genericArguments.add(genericArgumentReflection);
     }
   }
+
   TypeReflection _getTypeReflectionForArgument(TypeMirror m) {
     if (m.reflectedType == dynamic) return dynamicReflection;
     return new TypeReflection.fromMirror(m);
