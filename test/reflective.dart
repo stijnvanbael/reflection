@@ -2,7 +2,7 @@ library reflective.test;
 
 import 'package:test/test.dart';
 import 'package:reflective/reflective.dart';
-import 'package:collection/equality.dart';
+import 'package:collection/collection.dart';
 import 'test_library.dart';
 import 'dart:mirrors';
 
@@ -65,7 +65,7 @@ main() {
       expect(reflection.fullName, 'reflective.test.Project');
     });
 
-    test('Enums',(){
+    test('Enums', () {
       TypeReflection<Status> status = new TypeReflection(Status);
       expect(status.isEnum, true);
       expect(status.enumValues, Status.values);
@@ -113,8 +113,7 @@ main() {
       expect(typeReflection.isGeneric, true);
     });
 
-    test( "Generic properties", ( )
-    {
+    test("Generic properties", () {
       var mirror = reflectClass(GenericTypeWithAProperty);
       var typeReflection = new TypeReflection.fromMirror(mirror.originalDeclaration);
       var field = typeReflection.fields["property"];
@@ -123,14 +122,14 @@ main() {
       var otherTypeReflection = type(BaseClass);
       field = otherTypeReflection.fields["id"];
       expect(field.isGeneric, false);
-    } );
+    });
 
-    test('Non generic type', (){
+    test('Non generic type', () {
       var typeReflection = type(Role);
       expect(typeReflection.isGeneric, false);
     });
 
-    test('Generic declaration', (){
+    test('Generic declaration', () {
       ClassMirror typeMirror = reflectClass(GenericType);
       var typeReflection = new TypeReflection.fromMirror(typeMirror.originalDeclaration);
       expect(typeReflection.genericArguments.length, 1);
@@ -138,15 +137,13 @@ main() {
       expect(typeReflection.genericArguments[0].value, isNull);
     });
 
-    test( "Instance of generic declaration", ( )
-    {
+    test("Instance of generic declaration", () {
       var instance = new GenericType<int>();
       var typeReflection = new TypeReflection.fromInstance(instance);
       expect(typeReflection.genericArguments.length, 1);
       expect(typeReflection.genericArguments[0].name, "T");
       expect(typeReflection.genericArguments[0].value, new TypeReflection(int));
-    } );
-
+    });
 
 
     test('Reuse of reflections', () {
@@ -155,18 +152,35 @@ main() {
   });
 
   group('Library Reflection', () {
-    test('Types', (){
+    test('Types', () {
       var libraryReflection = new LibraryReflection('reflective.test_library');
-      expect(libraryReflection.types.any( (x) => x.rawType == TestType1 ), true);
-      expect(libraryReflection.types.any( (x) => x.rawType == TestType2 ), true);
-      expect(libraryReflection.types.any( (x) => x.rawType == TestType3 ), true);
-      expect(libraryReflection.types.any( (x) => x.rawType == TestBaseType ), true);
-
+      expect(libraryReflection.types.any((x) => x.rawType == TestType1), true);
+      expect(libraryReflection.types.any((x) => x.rawType == TestType2), true);
+      expect(libraryReflection.types.any((x) => x.rawType == TestType3), true);
+      expect(libraryReflection.types.any((x) => x.rawType == TestBaseType), true);
     });
 
     test('Name', () {
       var libraryReflection = new LibraryReflection('reflective.test_library');
       expect(libraryReflection.name, 'reflective.test_library');
+    });
+  });
+
+  group('Instance Reflection', () {
+    test('Field getter', () {
+      var employee = new Employee('John Doe');
+      var instanceReflection = new InstanceReflection(employee);
+      expect(instanceReflection
+          .field('name')
+          .value, 'John Doe');
+    });
+    test('Field setter', () {
+      var employee = new Employee('John Doe');
+      var instanceReflection = new InstanceReflection(employee);
+      instanceReflection
+          .field('name')
+          .value = 'Jane Doe';
+      expect(employee.name, 'Jane Doe');
     });
   });
 
@@ -181,12 +195,12 @@ main() {
         '"dateOfBirth":"1979-07-22 00:00:00.000","name":"Ellen"}],"name":"Development"}');
     Request request = new Request('/solution', {'sender': 'Deep Thought', 'accepts': 'any gratitude'});
     Department department = new Department('Development', [
-        new Employee('Mark', DateTime.parse('1974-03-17')),
-        new Employee('Sophie', DateTime.parse('1982-11-08'), null, "15edf9a"),
-        new Employee('Ellen', DateTime.parse('1979-07-22'), {
-            new Role('Scrum Master'): new Project('Payment Platform', false, 135.5),
-            new Role('Lead Developer'): new Project('Loyalty', true, 307.0)
-        })
+      new Employee('Mark', DateTime.parse('1974-03-17')),
+      new Employee('Sophie', DateTime.parse('1982-11-08'), null, "15edf9a"),
+      new Employee('Ellen', DateTime.parse('1979-07-22'), {
+        new Role('Scrum Master'): new Project('Payment Platform', false, 135.5),
+        new Role('Lead Developer'): new Project('Loyalty', true, 307.0)
+      })
     ]);
 
     test('Object to JSON', () {
@@ -204,7 +218,7 @@ main() {
 
     test('Unknown JSON property on target Object', () {
       expect(() => Conversion.convert(requestJsonWithUnknownProperty).to(Request), throwsA(
-        predicate((e) => e is JsonException && e.message == 'Unknown property: reflective.test.Request.unknown')
+          predicate((e) => e is JsonException && e.message == 'Unknown property: reflective.test.Request.unknown')
       ));
     });
   });
@@ -230,7 +244,9 @@ class Employee {
   DateTime dateOfBirth;
   Map<Role, Project> projects;
   @transient String jobDescription;
-  @transient @transient String _sessionId;
+  @transient
+  @transient
+  String _sessionId;
 
   Employee([this.name, this.dateOfBirth, this.projects, this._sessionId]);
 
@@ -259,7 +275,7 @@ class Project {
 
   Project([this.name, this.ongoing, this.storyPoints]);
 
-  bool operator ==(o) => o is Project  && name == o.name && ongoing == o.ongoing && storyPoints == o.storyPoints;
+  bool operator ==(o) => o is Project && name == o.name && ongoing == o.ongoing && storyPoints == o.storyPoints;
 
   int get hashCode => name.hashCode + ongoing.hashCode + storyPoints.hashCode;
 }
@@ -287,33 +303,28 @@ class MainClass extends SubClass {
 }
 
 enum Status {
-  active, suspended, deleted
+  active,
+  suspended,
+  deleted
 }
 
 abstract class AbstractBaseClass {
-
 }
 
-class OtherSubclass extends AbstractBaseClass
-{
-
+class OtherSubclass extends AbstractBaseClass {
 }
 
-class ClassWithMixin extends AbstractBaseClass with AMixin
-{
-
+class ClassWithMixin extends AbstractBaseClass
+    with AMixin {
 }
 
-class AMixin
-{
+class AMixin {
   int mixinProperty;
 }
 
-class GenericType<T>
-{
+class GenericType<T> {
 }
 
-class GenericTypeWithAProperty<T>
-{
+class GenericTypeWithAProperty<T> {
   T property;
 }

@@ -2,7 +2,7 @@ part of reflective.core;
 
 TypeReflection type(Type type) => new TypeReflection(type);
 
-TypeReflection instance(Object instance) => new TypeReflection.fromInstance(instance);
+TypeReflection typeFromInstance(Object instance) => new TypeReflection.fromInstance(instance);
 
 TypeReflection<dynamic> dynamicReflection = new TypeReflection(dynamic);
 
