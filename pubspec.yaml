@@ -4,6 +4,7 @@ homepage: https://github.com/stijnvanbael/reflection
 version: 0.0.25
 description: A fluent reflection API
 dependencies:
+  yaml: ">=2.1.0 <3.0.0"
 dev_dependencies:
   test: any
   collection: any

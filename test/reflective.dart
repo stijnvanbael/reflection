@@ -1,10 +1,12 @@
 library reflective.test;
 
-import 'package:test/test.dart';
-import 'package:reflective/reflective.dart';
-import 'package:collection/collection.dart';
-import 'test_library.dart';
 import 'dart:mirrors';
+
+import 'package:collection/collection.dart';
+import 'package:reflective/reflective.dart';
+import 'package:test/test.dart';
+
+import 'test_library.dart';
 
 
 main() {
@@ -187,12 +189,38 @@ main() {
   group('Conversion', () {
     setUp(() {
       installJsonConverters();
+      installYamlConverters();
     });
 
     Json requestJson = new Json('{"headers":{"sender":"Deep Thought","accepts":"any gratitude"},"path":"/solution"}');
     Json departmentJson = new Json('{"employees":[{"projects":null,"dateOfBirth":"1974-03-17 00:00:00.000","name":"Mark"},{"projects":null,"dateOfBirth":"1982-11-08 00:00:00.000","name":"Sophie"},'
         '{"projects":{"Scrum Master":{"lead":null,"storyPoints":135.5,"ongoing":false,"name":"Payment Platform"},"Lead Developer":{"lead":null,"storyPoints":307.0,"ongoing":true,"name":"Loyalty"}},'
         '"dateOfBirth":"1979-07-22 00:00:00.000","name":"Ellen"}],"name":"Development"}');
+    Yaml requestYaml = new Yaml(r'''
+headers:
+  sender: Deep Thought
+  accepts: any gratitude
+path: /solution
+''');
+    Yaml departmentYaml = new Yaml(r'''
+employees:
+  - dateOfBirth: 1974-03-17 00:00:00.000
+    name: Mark
+  - dateOfBirth: 1982-11-08 00:00:00.000
+    name: Sophie
+  - projects:
+      Scrum Master:
+        storyPoints: 135.5
+        ongoing: false
+        name: Payment Platform
+      Lead Developer:
+        storyPoints: 307.0
+        ongoing: true
+        name: Loyalty
+    dateOfBirth: 1979-07-22 00:00:00.000
+    name: Ellen
+name: Development
+''');
     Request request = new Request('/solution', {'sender': 'Deep Thought', 'accepts': 'any gratitude'});
     Department department = new Department('Development', [
       new Employee('Mark', DateTime.parse('1974-03-17')),
@@ -213,6 +241,10 @@ main() {
       expect(Conversion.convert(departmentJson).to(Department), department);
     });
 
+    test('YAML to Object', () {
+      expect(Conversion.convert(requestYaml).to(Request), request);
+      expect(Conversion.convert(departmentYaml).to(Department), department);
+    });
 
     Json requestJsonWithUnknownProperty = new Json('{"headers":{"sender":"Deep Thought","accepts":"any gratitude"},"path":"/solution","unknown":"unknown"}');
 

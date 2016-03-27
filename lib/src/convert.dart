@@ -1,7 +1,10 @@
 library reflective.convert;
 
 import 'dart:convert';
+
+
 import 'package:reflective/src/core.dart';
+import 'package:yaml/yaml.dart';
 
 typedef dynamic Transformation(dynamic object);
 
@@ -87,6 +90,10 @@ installJsonConverters() {
   Converters.add(new JsonToObject());
 }
 
+void installYamlConverters() {
+  Converters.add(new YamlToObject());
+}
+
 class ObjectToJson extends ConverterBase<Object, Json> {
   ObjectToJson() : super(new TypeReflection(Object), new TypeReflection(Json));
 
@@ -119,15 +126,10 @@ class ObjectToJson extends ConverterBase<Object, Json> {
   }
 }
 
-class JsonToObject extends ConverterBase<Json, Object> {
-  JsonToObject() : super(new TypeReflection(Json), new TypeReflection(Object));
+class ClassMappingConverter<T> extends ConverterBase<T, Object> {
+  ClassMappingConverter(TypeReflection source) : super(source, new TypeReflection(Object));
 
-  convertTo(Json json, TypeReflection targetReflection) {
-    var decoded = JSON.decode(json.toString());
-    return _convert(decoded, targetReflection);
-  }
-
-  _convert(object, TypeReflection targetReflection) {
+  mapTo(object, TypeReflection targetReflection) {
     if (object is Map) {
       if (targetReflection.sameOrSuper(Map)) {
         TypeReflection keyType = targetReflection.genericArguments[0].value;
@@ -135,7 +137,7 @@ class JsonToObject extends ConverterBase<Json, Object> {
         Map map = {};
         object.keys.forEach((k) {
           var newKey = keyType.sameOrSuper(k) ? k : keyType.construct(args: [k]);
-          map[newKey] = _convert(object[k], valueType);
+          map[newKey] = mapTo(object[k], valueType);
         });
         return map;
       } else {
@@ -144,17 +146,35 @@ class JsonToObject extends ConverterBase<Json, Object> {
           if (targetReflection.fields[k] ==
               null) throw new JsonException('Unknown property: ' + targetReflection.fullName + '.' + k);
         });
-        targetReflection.fields.forEach((name, field) => field.set(instance, _convert(object[name], field.type)));
+        targetReflection.fields.forEach((name, field) => field.set(instance, mapTo(object[name], field.type)));
         return instance;
       }
     } else if (object is Iterable) {
       TypeReflection itemType = targetReflection.genericArguments[0].value;
-      return new List.from(object.map((i) => _convert(i, itemType)));
+      return new List.from(object.map((i) => mapTo(i, itemType)));
     } else if (targetReflection.sameOrSuper(DateTime)) {
       return DateTime.parse(object);
     } else {
       return object;
     }
+  }
+}
+
+class YamlToObject extends ClassMappingConverter<Yaml> {
+  YamlToObject() : super(new TypeReflection(Yaml));
+
+  convertTo(Yaml yaml, TypeReflection targetReflection) {
+    var decoded = loadYaml(yaml.toString());
+    return mapTo(decoded, targetReflection);
+  }
+}
+
+class JsonToObject extends ClassMappingConverter<Json> {
+  JsonToObject() : super(new TypeReflection(Json));
+
+  convertTo(Json json, TypeReflection targetReflection) {
+    var decoded = JSON.decode(json.toString());
+    return mapTo(decoded, targetReflection);
   }
 }
 
@@ -172,6 +192,19 @@ class Json {
   bool operator ==(o) => o is Json && value == o.value;
 
   int get hashCode => value.hashCode;
+}
+
+class Yaml {
+  String value;
+
+  Yaml(this.value);
+
+  toString() => value;
+
+  bool operator ==(o) => o is Yaml && value == o.value;
+
+  int get hashCode => value.hashCode;
+
 }
 
 class Transient {

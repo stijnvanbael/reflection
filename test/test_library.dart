@@ -1,21 +1,17 @@
 library reflective.test_library;
 
-class TestType1
-{
+class TestType1 {
 
 }
 
-class TestType2
-{
+class TestType2 {
 
 }
 
-abstract class TestBaseType
-{
+abstract class TestBaseType {
 
 }
 
-class TestType3 extends TestBaseType
-{
+class TestType3 extends TestBaseType {
 
 }
