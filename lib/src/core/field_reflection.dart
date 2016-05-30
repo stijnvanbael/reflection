@@ -7,6 +7,8 @@ abstract class FieldReflection {
 
   List metadata(Type metadata);
 
+  List get allMetadata;
+
   value(Object entity);
 
   set(Object entity, value);
@@ -51,6 +53,8 @@ class TransitiveFieldReflection implements FieldReflection {
   bool has(Type metadata) => _source.has(metadata);
 
   List metadata(Type metadata) => _source.metadata(metadata);
+
+  List get allMetadata => _source.allMetadata;
 
   value(Object entity) {
     var sourceValue = _source.value(entity);
