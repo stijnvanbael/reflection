@@ -19,5 +19,5 @@ abstract class AbstractReflection<M extends DeclarationMirror> {
       new List.from(_mirror.metadata.where((instance) => instance.type.reflectedType == metadata)
           .map((instance) => instance.reflectee));
 
-  List get allMetadata => new List.from(_mirror.metadata);
+  List get allMetadata => new List.from(_mirror.metadata.map((instance) => instance.reflectee));
 }
