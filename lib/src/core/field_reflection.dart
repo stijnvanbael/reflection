@@ -3,6 +3,8 @@ part of reflective.core;
 abstract class FieldReflection {
   bool get isGeneric;
 
+  bool get isConst;
+
   bool has(Type metadata);
 
   List metadata(Type metadata);
@@ -40,6 +42,8 @@ class SimpleFieldReflection extends AbstractReflection<VariableMirror> with Fiel
 
   bool get isGeneric => _mirror.type is TypeVariableMirror;
 
+  bool get isConst => _mirror.isConst;
+
   bool operator ==(o) =>
       o is FieldReflection && fullName == o.fullName && _symbol == o._symbol;
 }
@@ -73,4 +77,6 @@ class TransitiveFieldReflection implements FieldReflection {
   bool get isPrivate => _target.isPrivate;
 
   bool get isGeneric => false;
+
+  bool get isConst => _target.isConst;
 }

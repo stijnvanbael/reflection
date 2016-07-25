@@ -147,6 +147,10 @@ main() {
       expect(typeReflection.genericArguments[0].value, new TypeReflection(int));
     });
 
+    test('Non generic type', (){
+      var typeReflection = type(ClassWithConst);
+      expect(typeReflection.fields["field"].isConst, true);
+    });
 
     test('Reuse of reflections', () {
       // TODO
@@ -359,4 +363,8 @@ class GenericType<T> {
 
 class GenericTypeWithAProperty<T> {
   T property;
+}
+
+class ClassWithConst{
+  static const String field = "hello";
 }
