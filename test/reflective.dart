@@ -1,16 +1,18 @@
 library reflective.test;
 
-import 'package:test/test.dart';
-import 'package:reflective/reflective.dart';
-import 'package:collection/equality.dart';
-import 'test_library.dart';
 import 'dart:mirrors';
 
+import 'package:collection/collection.dart';
+import 'package:reflective/reflective.dart';
+import 'package:test/test.dart';
+
+import 'test_library.dart';
 
 main() {
   group('Reflection', () {
     test('Variable generic arguments', () {
-      TypeReflection<Map<String, Project>> reflection = new TypeReflection(Map, [String, Project]);
+      TypeReflection<Map<String, Project>> reflection =
+          new TypeReflection(Map, [String, Project]);
       expect(reflection.genericArguments.length, 2);
       expect(reflection.genericArguments[0].value, new TypeReflection(String));
       expect(reflection.genericArguments[1].value, new TypeReflection(Project));
@@ -36,7 +38,8 @@ main() {
 
     test('Fields where', () {
       TypeReflection<Employee> reflection = new TypeReflection(Employee);
-      Map<String, FieldReflection> fields = reflection.fieldsWhere((field) => field.type.rawType == String);
+      Map<String, FieldReflection> fields =
+          reflection.fieldsWhere((field) => field.type.rawType == String);
       expect(fields, {
         'name': reflection.field('name'),
         'jobDescription': reflection.field('jobDescription'),
@@ -65,7 +68,7 @@ main() {
       expect(reflection.fullName, 'reflective.test.Project');
     });
 
-    test('Enums',(){
+    test('Enums', () {
       TypeReflection<Status> status = new TypeReflection(Status);
       expect(status.isEnum, true);
       expect(status.enumValues, Status.values);
@@ -113,41 +116,41 @@ main() {
       expect(typeReflection.isGeneric, true);
     });
 
-    test( "Generic properties", ( )
-    {
+    test("Generic properties", () {
       var mirror = reflectClass(GenericTypeWithAProperty);
-      var typeReflection = new TypeReflection.fromMirror(mirror.originalDeclaration);
+      var typeReflection =
+          new TypeReflection.fromMirror(mirror.originalDeclaration);
       var field = typeReflection.fields["property"];
       expect(field.isGeneric, true);
 
       var otherTypeReflection = type(BaseClass);
       field = otherTypeReflection.fields["id"];
       expect(field.isGeneric, false);
-    } );
+    });
 
-    test('Non generic type', (){
+    test('Non generic type', () {
       var typeReflection = type(Role);
       expect(typeReflection.isGeneric, false);
     });
 
-    test('Generic declaration', (){
+    test('Generic declaration', () {
       ClassMirror typeMirror = reflectClass(GenericType);
-      var typeReflection = new TypeReflection.fromMirror(typeMirror.originalDeclaration);
+      var typeReflection =
+          new TypeReflection.fromMirror(typeMirror.originalDeclaration);
       expect(typeReflection.genericArguments.length, 1);
       expect(typeReflection.genericArguments[0].name, "T");
       expect(typeReflection.genericArguments[0].value, isNull);
     });
 
-    test( "Instance of generic declaration", ( )
-    {
+    test("Instance of generic declaration", () {
       var instance = new GenericType<int>();
       var typeReflection = new TypeReflection.fromInstance(instance);
       expect(typeReflection.genericArguments.length, 1);
       expect(typeReflection.genericArguments[0].name, "T");
       expect(typeReflection.genericArguments[0].value, new TypeReflection(int));
-    } );
+    });
 
-    test('Non generic type', (){
+    test('Non generic type', () {
       var typeReflection = type(ClassWithConst);
       expect(typeReflection.fields["field"].isConst, true);
     });
@@ -158,13 +161,13 @@ main() {
   });
 
   group('Library Reflection', () {
-    test('Types', (){
+    test('Types', () {
       var libraryReflection = new LibraryReflection('reflective.test_library');
-      expect(libraryReflection.types.any( (x) => x.rawType == TestType1 ), true);
-      expect(libraryReflection.types.any( (x) => x.rawType == TestType2 ), true);
-      expect(libraryReflection.types.any( (x) => x.rawType == TestType3 ), true);
-      expect(libraryReflection.types.any( (x) => x.rawType == TestBaseType ), true);
-
+      expect(libraryReflection.types.any((x) => x.rawType == TestType1), true);
+      expect(libraryReflection.types.any((x) => x.rawType == TestType2), true);
+      expect(libraryReflection.types.any((x) => x.rawType == TestType3), true);
+      expect(
+          libraryReflection.types.any((x) => x.rawType == TestBaseType), true);
     });
 
     test('Name', () {
@@ -178,18 +181,21 @@ main() {
       installJsonConverters();
     });
 
-    Json requestJson = new Json('{"headers":{"sender":"Deep Thought","accepts":"any gratitude"},"path":"/solution"}');
-    Json departmentJson = new Json('{"employees":[{"projects":null,"dateOfBirth":"1974-03-17 00:00:00.000","name":"Mark"},{"projects":null,"dateOfBirth":"1982-11-08 00:00:00.000","name":"Sophie"},'
+    Json requestJson = new Json(
+        '{"headers":{"sender":"Deep Thought","accepts":"any gratitude"},"path":"/solution"}');
+    Json departmentJson = new Json(
+        '{"employees":[{"projects":null,"dateOfBirth":"1974-03-17 00:00:00.000","name":"Mark"},{"projects":null,"dateOfBirth":"1982-11-08 00:00:00.000","name":"Sophie"},'
         '{"projects":{"Scrum Master":{"lead":null,"storyPoints":135.5,"ongoing":false,"name":"Payment Platform"},"Lead Developer":{"lead":null,"storyPoints":307.0,"ongoing":true,"name":"Loyalty"}},'
         '"dateOfBirth":"1979-07-22 00:00:00.000","name":"Ellen"}],"name":"Development"}');
-    Request request = new Request('/solution', {'sender': 'Deep Thought', 'accepts': 'any gratitude'});
+    Request request = new Request(
+        '/solution', {'sender': 'Deep Thought', 'accepts': 'any gratitude'});
     Department department = new Department('Development', [
-        new Employee('Mark', DateTime.parse('1974-03-17')),
-        new Employee('Sophie', DateTime.parse('1982-11-08'), null, "15edf9a"),
-        new Employee('Ellen', DateTime.parse('1979-07-22'), {
-            new Role('Scrum Master'): new Project('Payment Platform', false, 135.5),
-            new Role('Lead Developer'): new Project('Loyalty', true, 307.0)
-        })
+      new Employee('Mark', DateTime.parse('1974-03-17')),
+      new Employee('Sophie', DateTime.parse('1982-11-08'), null, "15edf9a"),
+      new Employee('Ellen', DateTime.parse('1979-07-22'), {
+        new Role('Scrum Master'): new Project('Payment Platform', false, 135.5),
+        new Role('Lead Developer'): new Project('Loyalty', true, 307.0)
+      })
     ]);
 
     test('Object to JSON', () {
@@ -202,17 +208,19 @@ main() {
       expect(Conversion.convert(departmentJson).to(Department), department);
     });
 
-
-    Json requestJsonWithUnknownProperty = new Json('{"headers":{"sender":"Deep Thought","accepts":"any gratitude"},"path":"/solution","unknown":"unknown"}');
+    Json requestJsonWithUnknownProperty = new Json(
+        '{"headers":{"sender":"Deep Thought","accepts":"any gratitude"},"path":"/solution","unknown":"unknown"}');
 
     test('Unknown JSON property on target Object', () {
-      expect(() => Conversion.convert(requestJsonWithUnknownProperty).to(Request), throwsA(
-        predicate((e) => e is JsonException && e.message == 'Unknown property: reflective.test.Request.unknown')
-      ));
+      expect(
+          () => Conversion.convert(requestJsonWithUnknownProperty).to(Request),
+          throwsA(predicate((e) =>
+              e is JsonException &&
+              e.message ==
+                  'Unknown property: reflective.test.Request.unknown')));
     });
   });
 }
-
 
 Function listEq = const ListEquality().equals;
 Function mapEq = const MapEquality().equals;
@@ -223,7 +231,8 @@ class Department {
 
   Department([this.name, this.employees]);
 
-  bool operator ==(o) => o is Department && name == o.name && listEq(employees, o.employees);
+  bool operator ==(o) =>
+      o is Department && name == o.name && listEq(employees, o.employees);
 
   int get hashCode => name.hashCode + employees.hashCode;
 }
@@ -232,12 +241,19 @@ class Employee {
   String name;
   DateTime dateOfBirth;
   Map<Role, Project> projects;
-  @transient String jobDescription;
-  @transient @transient String _sessionId;
+  @transient
+  String jobDescription;
+  @transient
+  @transient
+  String _sessionId;
 
   Employee([this.name, this.dateOfBirth, this.projects, this._sessionId]);
 
-  bool operator ==(o) => o is Employee && name == o.name && dateOfBirth == o.dateOfBirth && mapEq(projects, o.projects);
+  bool operator ==(o) =>
+      o is Employee &&
+      name == o.name &&
+      dateOfBirth == o.dateOfBirth &&
+      mapEq(projects, o.projects);
 
   int get hashCode => name.hashCode + dateOfBirth.hashCode + projects.hashCode;
 }
@@ -262,7 +278,11 @@ class Project {
 
   Project([this.name, this.ongoing, this.storyPoints]);
 
-  bool operator ==(o) => o is Project  && name == o.name && ongoing == o.ongoing && storyPoints == o.storyPoints;
+  bool operator ==(o) =>
+      o is Project &&
+      name == o.name &&
+      ongoing == o.ongoing &&
+      storyPoints == o.storyPoints;
 
   int get hashCode => name.hashCode + ongoing.hashCode + storyPoints.hashCode;
 }
@@ -273,7 +293,8 @@ class Request {
 
   Request([this.path, this.headers]);
 
-  bool operator ==(o) => o is Request && path == o.path && mapEq(headers, o.headers);
+  bool operator ==(o) =>
+      o is Request && path == o.path && mapEq(headers, o.headers);
 }
 
 class BaseClass {
@@ -284,43 +305,28 @@ class SubClass extends BaseClass {
   String name;
 }
 
-
 class MainClass extends SubClass {
   bool works;
 }
 
-enum Status {
-  active, suspended, deleted
-}
+enum Status { active, suspended, deleted }
 
-abstract class AbstractBaseClass {
+abstract class AbstractBaseClass {}
 
-}
+class OtherSubclass extends AbstractBaseClass {}
 
-class OtherSubclass extends AbstractBaseClass
-{
+class ClassWithMixin extends AbstractBaseClass with AMixin {}
 
-}
-
-class ClassWithMixin extends AbstractBaseClass with AMixin
-{
-
-}
-
-class AMixin
-{
+class AMixin {
   int mixinProperty;
 }
 
-class GenericType<T>
-{
-}
+class GenericType<T> {}
 
-class GenericTypeWithAProperty<T>
-{
+class GenericTypeWithAProperty<T> {
   T property;
 }
 
-class ClassWithConst{
+class ClassWithConst {
   static const String field = "hello";
 }

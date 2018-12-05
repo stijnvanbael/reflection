@@ -1,5 +1,5 @@
-name: reflection
-author: Stijn Van Bael <stijnvanbael@gmail.com>
+name: reflective
+author: Stijn Van Bael <stijn.van.bael@appify.be>
 homepage: https://github.com/stijnvanbael/reflection
 version: 0.1.0
 description: A fluent reflection API
