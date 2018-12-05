@@ -4,7 +4,7 @@ homepage: https://github.com/stijnvanbael/reflection
 version: 0.1.0
 description: A fluent reflection API
 environment:
-  sdk: ^2.1.0
+  sdk: "<=3.0.0"
 dev_dependencies:
   test: any
   collection: any
