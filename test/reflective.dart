@@ -68,6 +68,12 @@ main() {
       expect(reflection.fullName, 'reflective.test.Project');
     });
 
+    test('Generic extraction', () {
+      TypeReflection<Project> reflection = new TypeReflection<Project>();
+      expect(reflection.name, 'Project');
+      expect(reflection.fullName, 'reflective.test.Project');
+    });
+
     test('Enums', () {
       TypeReflection<Status> status = new TypeReflection(Status);
       expect(status.isEnum, true);
