@@ -22,17 +22,20 @@ abstract class FieldReflection {
   bool get isPrivate;
 }
 
-class SimpleFieldReflection extends AbstractReflection<VariableMirror> with FieldReflection {
+class SimpleFieldReflection extends AbstractReflection<VariableMirror>
+    with FieldReflection {
   Symbol _symbol;
   MethodMirror _accessor;
 
-  SimpleFieldReflection(this._symbol, VariableMirror mirror, this._accessor) : super(mirror);
+  SimpleFieldReflection(this._symbol, VariableMirror mirror, this._accessor)
+      : super(mirror);
 
   value(Object entity) => reflect(entity).getField(_symbol).reflectee;
 
   set(Object entity, value) => reflect(entity).setField(_symbol, value);
 
-  TypeReflection get type => new TypeReflection.fromMirror(_accessor.returnType);
+  TypeReflection get type =>
+      new TypeReflection.fromMirror(_accessor.returnType);
 
   String get name => MirrorSystem.getName(_symbol);
 
@@ -43,7 +46,9 @@ class SimpleFieldReflection extends AbstractReflection<VariableMirror> with Fiel
   bool get isConst => _mirror.isConst;
 
   bool operator ==(o) =>
-      o is FieldReflection && fullName == o.fullName && _symbol == o._symbol;
+      o is SimpleFieldReflection &&
+      fullName == o.fullName &&
+      _symbol == o._symbol;
 }
 
 class TransitiveFieldReflection implements FieldReflection {

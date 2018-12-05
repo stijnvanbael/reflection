@@ -105,7 +105,7 @@ class TypeReflection<T> extends AbstractReflection<TypeMirror> {
   }
 
   Map<String, FieldReflection> fieldsWhere(bool test(FieldReflection field)) {
-    return Maps.where(fields, (key, value) => test(value));
+    return Map<String, FieldReflection>.from(Maps.where(fields, (key, value) => test(value)));
   }
 
   Map<String, FieldReflection> fieldsWith(Type metadata) {
@@ -148,7 +148,7 @@ class TypeReflection<T> extends AbstractReflection<TypeMirror> {
 
   List<GenericArgumentReflection> get genericArguments => _genericArguments;
 
-  T construct({Map namedArgs: const {}, List args: const [], String constructor: ''}) {
+  T construct({Map<Symbol, dynamic> namedArgs: const {}, List args: const [], String constructor: ''}) {
     if (_mirror is! ClassMirror) throw 'Cannot construct ' + fullName;
 
     ClassMirror classMirror = _mirror;

@@ -92,7 +92,7 @@ class ObjectToJson extends ConverterBase<Object, Json> {
 
   Json convertTo(Object object, TypeReflection targetReflection) {
     var simplified = _convert(object);
-    return new Json(JSON.encode(simplified));
+    return new Json(jsonEncode(simplified));
   }
 
   _convert(object) {
@@ -123,7 +123,7 @@ class JsonToObject extends ConverterBase<Json, Object> {
   JsonToObject() : super(new TypeReflection(Json), new TypeReflection(Object));
 
   convertTo(Json json, TypeReflection targetReflection) {
-    var decoded = JSON.decode(json.toString());
+    var decoded = jsonDecode(json.toString());
     return _convert(decoded, targetReflection);
   }
 
