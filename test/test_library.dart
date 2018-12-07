@@ -1,21 +1,16 @@
 library reflective.test_library;
 
-class TestType1
-{
+import 'package:reflective/reflective.dart';
 
-}
 
-class TestType2
-{
+@reflector
+class TestType1 {}
 
-}
+@reflector
+class TestType2 {}
 
-abstract class TestBaseType
-{
+@reflector
+abstract class TestBaseType {}
 
-}
-
-class TestType3 extends TestBaseType
-{
-
-}
+@reflector
+class TestType3 extends TestBaseType {}

@@ -1,4 +1,5 @@
-part of reflective.core;
+import 'package:reflectable/mirrors.dart';
+import 'package:reflective/reflective.dart';
 
 abstract class FieldReflection {
   bool get isGeneric;
@@ -7,13 +8,15 @@ abstract class FieldReflection {
 
   bool has(Type metadata);
 
-  List metadata(Type metadata);
+  List<T> metadata<T>();
 
   value(Object entity);
 
   set(Object entity, value);
 
   TypeReflection get type;
+
+  Type get rawType;
 
   String get name;
 
@@ -24,31 +27,30 @@ abstract class FieldReflection {
 
 class SimpleFieldReflection extends AbstractReflection<VariableMirror>
     with FieldReflection {
-  Symbol _symbol;
+  final String name;
   MethodMirror _accessor;
 
-  SimpleFieldReflection(this._symbol, VariableMirror mirror, this._accessor)
+  SimpleFieldReflection(this.name, VariableMirror mirror, this._accessor)
       : super(mirror);
 
-  value(Object entity) => reflect(entity).getField(_symbol).reflectee;
+  value(Object entity) => reflector.reflect(entity).invokeGetter(name);
 
-  set(Object entity, value) => reflect(entity).setField(_symbol, value);
+  set(Object entity, value) =>
+      reflector.reflect(entity).invokeSetter(name, value);
 
-  TypeReflection get type =>
-      new TypeReflection.fromMirror(_accessor.returnType);
-
-  String get name => MirrorSystem.getName(_symbol);
+  TypeReflection get type => TypeReflection.fromMirror(_accessor.returnType);
 
   String toString() => name;
 
-  bool get isGeneric => _mirror.type is TypeVariableMirror;
+  bool get isGeneric => mirror.type is TypeVariableMirror;
 
-  bool get isConst => _mirror.isConst;
+  bool get isConst => mirror.isConst;
 
   bool operator ==(o) =>
-      o is SimpleFieldReflection &&
-      fullName == o.fullName &&
-      _symbol == o._symbol;
+      o is SimpleFieldReflection && fullName == o.fullName && name == o.name;
+
+  @override
+  Type get rawType => _accessor.reflectedReturnType;
 }
 
 class TransitiveFieldReflection implements FieldReflection {
@@ -59,7 +61,7 @@ class TransitiveFieldReflection implements FieldReflection {
 
   bool has(Type metadata) => _source.has(metadata);
 
-  List metadata(Type metadata) => _source.metadata(metadata);
+  List<T> metadata<T>() => _source.metadata<T>();
 
   value(Object entity) {
     var sourceValue = _source.value(entity);
@@ -80,4 +82,7 @@ class TransitiveFieldReflection implements FieldReflection {
   bool get isGeneric => false;
 
   bool get isConst => _target.isConst;
+
+  @override
+  Type get rawType => _target.rawType;
 }

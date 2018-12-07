@@ -29,14 +29,14 @@ abstract class Optional<T> {
   const Optional();
 
   factory Optional.of(T value) {
-    return value == null ? empty : new Present(value);
+    return value == null ? empty : Present(value);
   }
 
   factory Optional.ofIterable(Iterable<T> iterable) {
     if (iterable != null && iterable.length > 1) {
-      throw new RangeError.range(iterable.length, 0, 1, 'iterable.length');
+      throw RangeError.range(iterable.length, 0, 1, 'iterable.length');
     }
-    return iterable == null || iterable.isEmpty ? empty : new Present(iterable.first);
+    return iterable == null || iterable.isEmpty ? empty : Present(iterable.first);
   }
 
   T get();
@@ -67,7 +67,7 @@ const empty = const Empty();
 class Empty<T> extends Optional<T> {
   const Empty();
 
-  T get() => throw new AbsentException();
+  T get() => throw AbsentException();
 
   T orElse(T other) => other;
 
@@ -106,7 +106,7 @@ class Present<T> extends Optional<T> {
 
   T or(T supplier()) => value;
 
-  Optional map(dynamic mapper(T value)) => new Optional.of(mapper(value));
+  Optional map(dynamic mapper(T value)) => Optional.of(mapper(value));
 
   Optional expand(Optional mapper(T value)) => mapper(value);
 

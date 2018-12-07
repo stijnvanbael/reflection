@@ -5,6 +5,10 @@ version: 0.1.1
 description: A fluent reflection API
 environment:
   sdk: "<=3.0.0"
+dependencies:
+  reflectable: ^2.0.8
 dev_dependencies:
   test: any
   collection: any
+  build_runner: any
+  build_test: any

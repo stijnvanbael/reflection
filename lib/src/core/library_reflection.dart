@@ -1,39 +1,38 @@
-part of reflective.core;
+import 'package:reflectable/mirrors.dart';
+import 'package:reflective/core.dart';
 
-LibraryReflection library(String libraryName) => new LibraryReflection(libraryName);
+LibraryReflection library(String libraryName) => LibraryReflection(libraryName);
 
 class LibraryReflection {
   LibraryMirror _library;
   List<TypeReflection> _types;
 
-  LibraryReflection.fromSymbol(Symbol libraryName) {
-    _library = currentMirrorSystem().findLibrary(libraryName);
-    _loadTypes();
-  }
-
   LibraryReflection(String libraryName) {
     if (libraryName.isEmpty) {
-      _library = currentMirrorSystem().isolate.rootLibrary;
+      _library = reflector.findLibrary('');
     } else {
-      _library = currentMirrorSystem().findLibrary(new Symbol(libraryName));
+      _library = reflector.findLibrary(libraryName);
     }
     _loadTypes();
   }
 
   void _loadTypes() {
-    _types = new List<TypeReflection>();
+    _types = List<TypeReflection>();
     _library.declarations.forEach((k, v) {
       try {
         if (v is ClassMirror) {
-          _types.add(new TypeReflection.fromMirror(v));
+          _types.add(TypeReflection.fromMirror(v));
         }
       } catch (e) {
-		  throw "Error when creating TypeReflection for type " + v.toString() + ": " + e.toString();
-	  }
+        throw "Error when creating TypeReflection for type " +
+            v.toString() +
+            ": " +
+            e.toString();
+      }
     });
   }
 
   List<TypeReflection> get types => _types;
 
-  String get name => MirrorSystem.getName(_library.qualifiedName);
+  String get name => _library.qualifiedName;
 }

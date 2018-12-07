@@ -1,21 +1,24 @@
-part of reflective.core;
+import 'package:reflectable/mirrors.dart';
+import 'package:reflective/src/core/type_reflection.dart';
 
 abstract class AbstractReflection<M extends DeclarationMirror> {
-  M _mirror;
+  M mirror;
 
-  AbstractReflection(this._mirror);
+  AbstractReflection(this.mirror);
 
-  String get name => MirrorSystem.getName(_mirror.simpleName);
+  String get name => mirror.simpleName;
 
-  String get fullName => MirrorSystem.getName(_mirror.qualifiedName);
+  String get fullName => mirror.qualifiedName;
 
-  bool get isPrivate => _mirror.isPrivate;
+  bool get isPrivate => mirror.isPrivate;
 
   bool has(Type metadata) =>
-      _mirror.metadata.firstWhere((instance) =>
-          instance.type.reflectedType == metadata, orElse: () => null) != null;
+      mirror.metadata.firstWhere(
+        (instance) => TypeReflection.fromInstance(instance).rawType == metadata,
+        orElse: () => null,
+      ) !=
+      null;
 
-  List metadata(Type metadata) =>
-      new List.from(_mirror.metadata.where((instance) => instance.type.reflectedType == metadata)
-          .map((instance) => instance.reflectee));
+  List<T> metadata<T>() => List.from(mirror.metadata
+      .where((instance) => TypeReflection.fromInstance(instance).rawType == T));
 }
