@@ -1,6 +1,7 @@
 library reflective.convert;
 
 import 'dart:convert';
+
 import 'package:reflective/src/core.dart';
 
 typedef dynamic Transformation(dynamic object);
@@ -132,7 +133,7 @@ class JsonToObject extends ConverterBase<Json, Object> {
       if (targetReflection.sameOrSuper(Map)) {
         TypeReflection keyType = targetReflection.genericArguments[0].value;
         TypeReflection valueType = targetReflection.genericArguments[1].value;
-        Map map = {};
+        Map map = targetReflection.construct();
         object.keys.forEach((k) {
           var newKey = keyType.sameOrSuper(k) ? k : keyType.construct(args: [k]);
           map[newKey] = _convert(object[k], valueType);
@@ -141,15 +142,17 @@ class JsonToObject extends ConverterBase<Json, Object> {
       } else {
         var instance = targetReflection.construct();
         object.keys.forEach((k) {
-          if (targetReflection.fields[k] ==
-              null) throw new JsonException('Unknown property: ' + targetReflection.fullName + '.' + k);
+          if (targetReflection.fields[k] == null)
+            throw new JsonException('Unknown property: ' + targetReflection.fullName + '.' + k);
         });
         targetReflection.fields.forEach((name, field) => field.set(instance, _convert(object[name], field.type)));
         return instance;
       }
     } else if (object is Iterable) {
       TypeReflection itemType = targetReflection.genericArguments[0].value;
-      return new List.from(object.map((i) => _convert(i, itemType)));
+      List list = targetReflection.construct();
+      object.forEach((i) => list.add(_convert(i, itemType)));
+      return list;
     } else if (targetReflection.sameOrSuper(DateTime)) {
       return DateTime.parse(object);
     } else {
