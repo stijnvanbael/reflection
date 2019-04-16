@@ -11,8 +11,7 @@ import 'test_library.dart';
 main() {
   group('Reflection', () {
     test('Variable generic arguments', () {
-      TypeReflection<Map<String, Project>> reflection =
-          new TypeReflection(Map, [String, Project]);
+      TypeReflection<Map<String, Project>> reflection = new TypeReflection(Map, [String, Project]);
       expect(reflection.genericArguments.length, 2);
       expect(reflection.genericArguments[0].value, new TypeReflection(String));
       expect(reflection.genericArguments[1].value, new TypeReflection(Project));
@@ -38,8 +37,7 @@ main() {
 
     test('Fields where', () {
       TypeReflection<Employee> reflection = new TypeReflection(Employee);
-      Map<String, FieldReflection> fields =
-          reflection.fieldsWhere((field) => field.type.rawType == String);
+      Map<String, FieldReflection> fields = reflection.fieldsWhere((field) => field.type.rawType == String);
       expect(fields, {
         'name': reflection.field('name'),
         'jobDescription': reflection.field('jobDescription'),
@@ -124,8 +122,7 @@ main() {
 
     test("Generic properties", () {
       var mirror = reflectClass(GenericTypeWithAProperty);
-      var typeReflection =
-          new TypeReflection.fromMirror(mirror.originalDeclaration);
+      var typeReflection = new TypeReflection.fromMirror(mirror.originalDeclaration);
       var field = typeReflection.fields["property"];
       expect(field.isGeneric, true);
 
@@ -141,8 +138,7 @@ main() {
 
     test('Generic declaration', () {
       ClassMirror typeMirror = reflectClass(GenericType);
-      var typeReflection =
-          new TypeReflection.fromMirror(typeMirror.originalDeclaration);
+      var typeReflection = new TypeReflection.fromMirror(typeMirror.originalDeclaration);
       expect(typeReflection.genericArguments.length, 1);
       expect(typeReflection.genericArguments[0].name, "T");
       expect(typeReflection.genericArguments[0].value, isNull);
@@ -166,14 +162,47 @@ main() {
     });
   });
 
+  group('Method Reflection', () {
+    test('All methods', () {
+      var typeWithMethods = type(TypeWithMethods);
+
+      expect(typeWithMethods.methods.length, 3);
+      expect(typeWithMethods.methods["methodWithoutMeta"].name, "methodWithoutMeta");
+      expect(typeWithMethods.methods["methodWithoutMeta"].returnType, type(String));
+      expect(typeWithMethods.methods["methodWithoutMeta"].parameters.length, 2);
+      expect(typeWithMethods.methods["methodWithoutMeta"].parameters["param1"].name, "param1");
+      expect(typeWithMethods.methods["methodWithoutMeta"].parameters["param1"].type, type(int));
+    });
+
+    test('Methods with meta', () {
+      var typeWithMethods = type(TypeWithMethods);
+
+      var methods = typeWithMethods.methodsWith(Meta);
+      expect(methods.length, 1);
+      expect(typeWithMethods.methods["methodWithMeta"].name, "methodWithMeta");
+      expect(typeWithMethods.methods["methodWithMeta"].returnType, type(String));
+      expect(typeWithMethods.methods["methodWithMeta"].parameters.length, 2);
+      expect(typeWithMethods.methods["methodWithMeta"].parameters["param1"].name, "param1");
+      expect(typeWithMethods.methods["methodWithMeta"].parameters["param1"].type, type(int));
+    });
+
+    test('Invoke non-static method', () {
+      var typeWithMethods = type(TypeWithMethods);
+
+      var method = typeWithMethods.methods["methodWithoutMeta"];
+      var object = new TypeWithMethods();
+      var returnValue = method.invoke(object, [1, true]);
+      expect(returnValue, "foo 1 true");
+    });
+  });
+
   group('Library Reflection', () {
     test('Types', () {
       var libraryReflection = new LibraryReflection('reflective.test_library');
       expect(libraryReflection.types.any((x) => x.rawType == TestType1), true);
       expect(libraryReflection.types.any((x) => x.rawType == TestType2), true);
       expect(libraryReflection.types.any((x) => x.rawType == TestType3), true);
-      expect(
-          libraryReflection.types.any((x) => x.rawType == TestBaseType), true);
+      expect(libraryReflection.types.any((x) => x.rawType == TestBaseType), true);
     });
 
     test('Name', () {
@@ -187,14 +216,12 @@ main() {
       installJsonConverters();
     });
 
-    Json requestJson = new Json(
-        '{"headers":{"sender":"Deep Thought","accepts":"any gratitude"},"path":"/solution"}');
+    Json requestJson = new Json('{"headers":{"sender":"Deep Thought","accepts":"any gratitude"},"path":"/solution"}');
     Json departmentJson = new Json(
         '{"employees":[{"projects":null,"dateOfBirth":"1974-03-17 00:00:00.000","name":"Mark"},{"projects":null,"dateOfBirth":"1982-11-08 00:00:00.000","name":"Sophie"},'
         '{"projects":{"Scrum Master":{"lead":null,"storyPoints":135.5,"ongoing":false,"name":"Payment Platform"},"Lead Developer":{"lead":null,"storyPoints":307.0,"ongoing":true,"name":"Loyalty"}},'
         '"dateOfBirth":"1979-07-22 00:00:00.000","name":"Ellen"}],"name":"Development"}');
-    Request request = new Request(
-        '/solution', {'sender': 'Deep Thought', 'accepts': 'any gratitude'});
+    Request request = new Request('/solution', {'sender': 'Deep Thought', 'accepts': 'any gratitude'});
     Department department = new Department('Development', [
       new Employee('Mark', DateTime.parse('1974-03-17')),
       new Employee('Sophie', DateTime.parse('1982-11-08'), null, "15edf9a"),
@@ -220,10 +247,8 @@ main() {
     test('Unknown JSON property on target Object', () {
       expect(
           () => Conversion.convert(requestJsonWithUnknownProperty).to(Request),
-          throwsA(predicate((e) =>
-              e is JsonException &&
-              e.message ==
-                  'Unknown property: reflective.test.Request.unknown')));
+          throwsA(predicate(
+              (e) => e is JsonException && e.message == 'Unknown property: reflective.test.Request.unknown')));
     });
   });
 }
@@ -237,8 +262,7 @@ class Department {
 
   Department([this.name, this.employees]);
 
-  bool operator ==(o) =>
-      o is Department && name == o.name && listEq(employees, o.employees);
+  bool operator ==(o) => o is Department && name == o.name && listEq(employees, o.employees);
 
   int get hashCode => name.hashCode + employees.hashCode;
 }
@@ -255,11 +279,7 @@ class Employee {
 
   Employee([this.name, this.dateOfBirth, this.projects, this._sessionId]);
 
-  bool operator ==(o) =>
-      o is Employee &&
-      name == o.name &&
-      dateOfBirth == o.dateOfBirth &&
-      mapEq(projects, o.projects);
+  bool operator ==(o) => o is Employee && name == o.name && dateOfBirth == o.dateOfBirth && mapEq(projects, o.projects);
 
   int get hashCode => name.hashCode + dateOfBirth.hashCode + projects.hashCode;
 }
@@ -284,11 +304,7 @@ class Project {
 
   Project([this.name, this.ongoing, this.storyPoints]);
 
-  bool operator ==(o) =>
-      o is Project &&
-      name == o.name &&
-      ongoing == o.ongoing &&
-      storyPoints == o.storyPoints;
+  bool operator ==(o) => o is Project && name == o.name && ongoing == o.ongoing && storyPoints == o.storyPoints;
 
   int get hashCode => name.hashCode + ongoing.hashCode + storyPoints.hashCode;
 }
@@ -299,8 +315,7 @@ class Request {
 
   Request([this.path, this.headers]);
 
-  bool operator ==(o) =>
-      o is Request && path == o.path && mapEq(headers, o.headers);
+  bool operator ==(o) => o is Request && path == o.path && mapEq(headers, o.headers);
 }
 
 class BaseClass {
@@ -335,4 +350,15 @@ class GenericTypeWithAProperty<T> {
 
 class ClassWithConst {
   static const String field = "hello";
+}
+
+class Meta {
+  const Meta();
+}
+
+class TypeWithMethods {
+  String methodWithoutMeta(int param1, bool param2) => "foo $param1 $param2";
+
+  @Meta()
+  String methodWithMeta(int param1, bool param2) => "bar $param1 $param2";
 }
