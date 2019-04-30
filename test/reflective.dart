@@ -218,18 +218,21 @@ main() {
 
     Json requestJson = new Json('{"headers":{"sender":"Deep Thought","accepts":"any gratitude"},"path":"/solution"}');
     Json departmentJson = new Json(
-        '{"employees":[{"projects":null,"dateOfBirth":"1974-03-17 00:00:00.000","name":"Mark"},{"projects":null,"dateOfBirth":"1982-11-08 00:00:00.000","name":"Sophie"},'
+        '{"type":"costs","employees":[{"projects":null,"dateOfBirth":"1974-03-17 00:00:00.000","name":"Mark"},{"projects":null,"dateOfBirth":"1982-11-08 00:00:00.000","name":"Sophie"},'
         '{"projects":{"Scrum Master":{"lead":null,"storyPoints":135.5,"ongoing":false,"name":"Payment Platform"},"Lead Developer":{"lead":null,"storyPoints":307.0,"ongoing":true,"name":"Loyalty"}},'
         '"dateOfBirth":"1979-07-22 00:00:00.000","name":"Ellen"}],"name":"Development"}');
     Request request = new Request('/solution', {'sender': 'Deep Thought', 'accepts': 'any gratitude'});
-    Department department = new Department('Development', [
-      new Employee('Mark', DateTime.parse('1974-03-17')),
-      new Employee('Sophie', DateTime.parse('1982-11-08'), null, "15edf9a"),
-      new Employee('Ellen', DateTime.parse('1979-07-22'), {
-        new Role('Scrum Master'): new Project('Payment Platform', false, 135.5),
-        new Role('Lead Developer'): new Project('Loyalty', true, 307.0)
-      })
-    ]);
+    Department department = new Department(
+        'Development',
+        [
+          new Employee('Mark', DateTime.parse('1974-03-17')),
+          new Employee('Sophie', DateTime.parse('1982-11-08'), null, "15edf9a"),
+          new Employee('Ellen', DateTime.parse('1979-07-22'), {
+            new Role('Scrum Master'): new Project('Payment Platform', false, 135.5),
+            new Role('Lead Developer'): new Project('Loyalty', true, 307.0)
+          })
+        ],
+        DepartmentType.costs);
 
     test('Object to JSON', () {
       expect(Conversion.convert(request).to(Json), requestJson);
@@ -259,13 +262,16 @@ Function mapEq = const MapEquality().equals;
 class Department {
   String name;
   List<Employee> employees;
+  DepartmentType type;
 
-  Department([this.name, this.employees]);
+  Department([this.name, this.employees, this.type]);
 
   bool operator ==(o) => o is Department && name == o.name && listEq(employees, o.employees);
 
   int get hashCode => name.hashCode + employees.hashCode;
 }
+
+enum DepartmentType { production, sales, costs }
 
 class Employee {
   String name;

@@ -109,6 +109,10 @@ class ObjectToJson extends ConverterBase<Object, Json> {
       return map;
     } else {
       TypeReflection type = new TypeReflection.fromInstance(object);
+      if (type.isEnum) {
+        var string = object.toString();
+        return string.substring(string.indexOf('.') + 1);
+      }
       return type.fields.values
           .where((field) => !field.has(Transient))
           .map((field) => {field.name: _convert(field.value(object))})
@@ -155,6 +159,8 @@ class JsonToObject extends ConverterBase<Json, Object> {
       return list;
     } else if (targetReflection.sameOrSuper(DateTime)) {
       return DateTime.parse(object);
+    } else if (targetReflection.isEnum) {
+      return targetReflection.enumValues.firstWhere((v) => v.toString().endsWith('.$object'), orElse: () => null);
     } else {
       return object;
     }
