@@ -14,8 +14,8 @@ abstract class AbstractReflection<M extends DeclarationMirror> {
   bool has(Type metadata) =>
       _mirror.metadata.firstWhere((instance) => instance.type.reflectedType == metadata, orElse: () => null) != null;
 
-  List metadata(Type metadata) => metadataWhere((instance) => instance.type.reflectedType == metadata);
+  List metadata(Type type) => metadataWhere((metadata) => metadata.runtimeType == type);
 
   List metadataWhere(bool filter(metadata)) =>
-      new List.from(_mirror.metadata.where(filter).map((instance) => instance.reflectee));
+      new List.from(_mirror.metadata.map((instance) => instance.reflectee).where(filter));
 }
