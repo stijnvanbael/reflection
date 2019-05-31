@@ -1,7 +1,7 @@
 name: reflective
 author: Stijn Van Bael <stijn.van.bael@appify.be>
 homepage: https://github.com/stijnvanbael/reflection
-version: 0.1.4
+version: 0.1.5
 description: A fluent reflection API
 environment:
   sdk: "<=3.0.0"

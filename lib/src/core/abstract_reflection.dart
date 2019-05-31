@@ -12,10 +12,10 @@ abstract class AbstractReflection<M extends DeclarationMirror> {
   bool get isPrivate => _mirror.isPrivate;
 
   bool has(Type metadata) =>
-      _mirror.metadata.firstWhere((instance) =>
-          instance.type.reflectedType == metadata, orElse: () => null) != null;
+      _mirror.metadata.firstWhere((instance) => instance.type.reflectedType == metadata, orElse: () => null) != null;
 
-  List metadata(Type metadata) =>
-      new List.from(_mirror.metadata.where((instance) => instance.type.reflectedType == metadata)
-          .map((instance) => instance.reflectee));
+  List metadata(Type metadata) => metadataWhere((instance) => instance.type.reflectedType == metadata);
+
+  List metadataWhere(bool filter(metadata)) =>
+      new List.from(_mirror.metadata.where(filter).map((instance) => instance.reflectee));
 }
