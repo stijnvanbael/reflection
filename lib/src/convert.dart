@@ -145,11 +145,11 @@ class JsonToObject extends ConverterBase<Json, Object> {
         return map;
       } else {
         var instance = targetReflection.construct();
-        object.keys.forEach((k) {
-          if (targetReflection.fields[k] == null)
-            throw new JsonException('Unknown property: ' + targetReflection.fullName + '.' + k);
+        targetReflection.fields.forEach((name, field) {
+          if (field != null) {
+            field.set(instance, _convert(object[name], field.type));
+          }
         });
-        targetReflection.fields.forEach((name, field) => field.set(instance, _convert(object[name], field.type)));
         return instance;
       }
     } else if (object is Iterable) {

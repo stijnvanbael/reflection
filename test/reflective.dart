@@ -248,10 +248,7 @@ main() {
         '{"headers":{"sender":"Deep Thought","accepts":"any gratitude"},"path":"/solution","unknown":"unknown"}');
 
     test('Unknown JSON property on target Object', () {
-      expect(
-          () => Conversion.convert(requestJsonWithUnknownProperty).to(Request),
-          throwsA(predicate(
-              (e) => e is JsonException && e.message == 'Unknown property: reflective.test.Request.unknown')));
+      expect(Conversion.convert(requestJsonWithUnknownProperty).to(Request), request);
     });
   });
 }
