@@ -20,22 +20,21 @@ abstract class FieldReflection {
   String get fullName;
 
   bool get isPrivate;
+
+  List metadataWhere(bool filter(metadata));
 }
 
-class SimpleFieldReflection extends AbstractReflection<VariableMirror>
-    with FieldReflection {
+class SimpleFieldReflection extends AbstractReflection<VariableMirror> with FieldReflection {
   Symbol _symbol;
   MethodMirror _accessor;
 
-  SimpleFieldReflection(this._symbol, VariableMirror mirror, this._accessor)
-      : super(mirror);
+  SimpleFieldReflection(this._symbol, VariableMirror mirror, this._accessor) : super(mirror);
 
   value(Object entity) => reflect(entity).getField(_symbol).reflectee;
 
   set(Object entity, value) => reflect(entity).setField(_symbol, value);
 
-  TypeReflection get type =>
-      new TypeReflection.fromMirror(_accessor.returnType);
+  TypeReflection get type => new TypeReflection.fromMirror(_accessor.returnType);
 
   String get name => MirrorSystem.getName(_symbol);
 
@@ -45,10 +44,7 @@ class SimpleFieldReflection extends AbstractReflection<VariableMirror>
 
   bool get isConst => _mirror.isConst;
 
-  bool operator ==(o) =>
-      o is SimpleFieldReflection &&
-      fullName == o.fullName &&
-      _symbol == o._symbol;
+  bool operator ==(o) => o is SimpleFieldReflection && fullName == o.fullName && _symbol == o._symbol;
 }
 
 class TransitiveFieldReflection implements FieldReflection {
@@ -60,6 +56,9 @@ class TransitiveFieldReflection implements FieldReflection {
   bool has(Type metadata) => _source.has(metadata);
 
   List metadata(Type metadata) => _source.metadata(metadata);
+
+  @override
+  List metadataWhere(bool filter(metadata)) => _source.metadataWhere(filter);
 
   value(Object entity) {
     var sourceValue = _source.value(entity);

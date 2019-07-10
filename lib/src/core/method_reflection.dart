@@ -6,7 +6,7 @@ class MethodReflection extends AbstractReflection<MethodMirror> {
   TypeReflection get returnType => TypeReflection.fromMirror(_mirror.returnType);
 
   dynamic invoke(dynamic object, List<dynamic> positionalArguments) =>
-    reflect(object).invoke(_mirror.simpleName, positionalArguments).reflectee;
+      reflect(object).invoke(_mirror.simpleName, positionalArguments).reflectee;
 
   Map<String, ParameterReflection> get parameters {
     var params = <String, ParameterReflection>{};
@@ -16,6 +16,14 @@ class MethodReflection extends AbstractReflection<MethodMirror> {
     });
     return params;
   }
+
+  bool get isGetter => _mirror.isGetter;
+
+  bool get isSetter => _mirror.isSetter;
+
+  bool get isConstructor => _mirror.isConstructor;
+
+  bool get isOperator => _mirror.isOperator;
 }
 
 class ParameterReflection extends AbstractReflection<ParameterMirror> {
