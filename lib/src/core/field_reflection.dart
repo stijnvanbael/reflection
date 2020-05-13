@@ -68,7 +68,7 @@ class TransitiveFieldReflection implements FieldReflection {
 
   set(Object entity, value) => _target.set(_source.value(entity), value);
 
-  TypeReflection get type => _source.type;
+  TypeReflection get type => _target.type;
 
   String get name => _source.name + '.' + _target.name;
 

@@ -146,10 +146,11 @@ class TypeReflection<T> extends AbstractReflection<TypeMirror> {
     if (components.length == 1) return fields[components[0]];
     FieldReflection field = null;
     components.forEach((c) {
-      if (field == null)
+      if (field == null) {
         field = fields[c];
-      else
-        field = new TransitiveFieldReflection(field, fields[c]);
+      } else {
+        field = new TransitiveFieldReflection(field, field.type.field(c));
+      }
     });
     return field;
   }
